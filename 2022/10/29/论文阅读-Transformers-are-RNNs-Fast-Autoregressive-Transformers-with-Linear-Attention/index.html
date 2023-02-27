@@ -19,7 +19,7 @@
     <meta name="description" content="之前的工作证明了多头自注意力只要有足够的注意力头数就可以表示任意的卷积层。但是，本文反向表明，用自回归目标训练的自注意力层可以被看作是一个RNN，可以显著加快自回归transformer模型的推理时间。 Transformer \(x\in\mathbb{R}^{N\times F}\),\(N\)个\(F\)维的特征向量。Transformer即一个函数\(T:\mathbb{R}^{N\tim">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[论文阅读] Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention">
-<meta property="og:url" content="http://k0145vin.com/2022/10/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Transformers-are-RNNs-Fast-Autoregressive-Transformers-with-Linear-Attention/index.html">
+<meta property="og:url" content="http://k0145vin.xyz/2022/10/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Transformers-are-RNNs-Fast-Autoregressive-Transformers-with-Linear-Attention/index.html">
 <meta property="og:site_name" content="一瓶AD钙的博客">
 <meta property="og:description" content="之前的工作证明了多头自注意力只要有足够的注意力头数就可以表示任意的卷积层。但是，本文反向表明，用自回归目标训练的自注意力层可以被看作是一个RNN，可以显著加快自回归transformer模型的推理时间。 Transformer \(x\in\mathbb{R}^{N\times F}\),\(N\)个\(F\)维的特征向量。Transformer即一个函数\(T:\mathbb{R}^{N\tim">
 <meta property="og:locale" content="zh_CN">
@@ -70,7 +70,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"k0145vin.com","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"k0145vin.xyz","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -385,7 +385,7 @@ V_i^\prime=\frac{\phi(Q_i)^TS_i}{\phi(Q_I)^TZ_i}
   <div class="license-box my-3">
     <div class="license-title">
       <div>[论文阅读] Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention</div>
-      <div>http://k0145vin.com/2022/10/29/论文阅读-Transformers-are-RNNs-Fast-Autoregressive-Transformers-with-Linear-Attention/</div>
+      <div>http://k0145vin.xyz/2022/10/29/论文阅读-Transformers-are-RNNs-Fast-Autoregressive-Transformers-with-Linear-Attention/</div>
     </div>
     <div class="license-meta">
       
