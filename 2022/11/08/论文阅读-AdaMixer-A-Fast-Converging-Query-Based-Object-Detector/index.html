@@ -1,0 +1,753 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.png">
+  <link rel="icon" href="/img/icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="一瓶AD钙">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="TransformerEncoder、MultiScale Deformable TransformerEncoder、FPN增加了计算成本，训练需要大量的时间和数据。 提高跨图像解码查询的适应性 Object Query Decoder Revisited  Comparisons  Our Object Query Definition 根据object query的定义，还是将一个query">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[论文阅读]AdaMixer: A Fast-Converging Query-Based Object Detector">
+<meta property="og:url" content="http://k0145vin.com/2022/11/08/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-AdaMixer-A-Fast-Converging-Query-Based-Object-Detector/index.html">
+<meta property="og:site_name" content="一瓶AD钙的博客">
+<meta property="og:description" content="TransformerEncoder、MultiScale Deformable TransformerEncoder、FPN增加了计算成本，训练需要大量的时间和数据。 提高跨图像解码查询的适应性 Object Query Decoder Revisited  Comparisons  Our Object Query Definition 根据object query的定义，还是将一个query">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211031125595.png">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211041039003.png">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211041455275.png">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211081547831.png">
+<meta property="article:published_time" content="2022-11-08T09:42:45.000Z">
+<meta property="article:modified_time" content="2023-01-05T09:18:12.497Z">
+<meta property="article:author" content="一瓶AD钙">
+<meta property="article:tag" content="论文阅读">
+<meta property="article:tag" content="Object Detection">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211031125595.png">
+  
+  
+  
+  <title>[论文阅读]AdaMixer: A Fast-Converging Query-Based Object Detector - 一瓶AD钙的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"k0145vin.com","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>一瓶AD钙的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[论文阅读]AdaMixer: A Fast-Converging Query-Based Object Detector"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        一瓶AD钙
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-11-08 17:42" pubdate>
+          2022年11月8日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          35 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">[论文阅读]AdaMixer: A Fast-Converging Query-Based Object Detector</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>TransformerEncoder、MultiScale Deformable TransformerEncoder、FPN增加了计算成本，训练需要大量的时间和数据。</p>
+<p>提高跨图像解码查询的适应性</p>
+<h5 id="object-query-decoder-revisited">Object Query Decoder Revisited</h5>
+<figure>
+<img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211031125595.png" srcset="/img/loading.gif" lazyload alt="Comparisons" /><figcaption aria-hidden="true">Comparisons</figcaption>
+</figure>
+<h5 id="our-object-query-definition">Our Object Query Definition</h5>
+<p>根据object query的定义，还是将一个query解耦为两个向量：content vector <span class="math inline">\(\mathrm{q}\)</span>和positional vetor <span class="math inline">\((x,y,z,r)\)</span>。content vector <span class="math inline">\(\mathbf{q}\)</span>是<span class="math inline">\(\mathbb{R}^{d_q}\)</span>中的一个向量，<span class="math inline">\(d_q\)</span>是通道维数。向量<span class="math inline">\((x,y,z,r)\)</span>中<span class="math inline">\(x,y\)</span>是bounding box的中心坐标，<span class="math inline">\(z\)</span>是框大小的对数，<span class="math inline">\(r\)</span>是长宽比的对数。<span class="math inline">\(x,y,z\)</span>还可以直接表示3D特征空间中query的坐标。</p>
+<p><strong>Decoding the bounding box from a query</strong></p>
+<p>可以从位置编码中解码边界框信息。中心点<span class="math inline">\((x_B,y_B)\)</span>，宽和高<span class="math inline">\(w_B,h_B\)</span>解码： <span class="math display">\[
+x_B=s_{base}\cdot x,y_B=s_{base}\cdot y
+\]</span></p>
+<p><span class="math display">\[
+w_B=s_{base}\cdot 2^{z-r},h_B=s_{base}\cdot 2^{z+r}
+\]</span></p>
+<p><span class="math inline">\(s_{base}\)</span>是下采样步长偏移量，根据实验一般设置为<span class="math inline">\(s_{base}=4\)</span>。</p>
+<h5 id="adaptive-location-sampling">Adaptive Location Sampling</h5>
+<p>decoder应该自适应地针对query决定采样哪个特征。也就是说，decoder应该同时考虑位置向量<span class="math inline">\((x,y,z,r)\)</span>和内容向量<span class="math inline">\(\mathbf{q}\)</span>对采样位置进行采样位置进行解码。此外，decoder不仅要在<span class="math inline">\((x,y)\)</span>空间上是自适应的，在潜在目标的尺度上也要是自适应的。具体来说，通过将多尺度特征看作一个三维特征空间，自适应地从中采样。</p>
+<p><strong>Multi- scale features as the 3D feature space</strong></p>
+<p>给定一个索引为<span class="math inline">\(j\)</span>，下采样步长为<span class="math inline">\(s_j^{feat}\)</span>的特征图，先通过线性映射到相同的通道数<span class="math inline">\(d_{feat}\)</span>，然后计算z轴坐标： <span class="math display">\[
+z_j^{feat}=\log_2(s_j^{feat}/s_{base})
+\]</span> 然后将不同步长的特征图的高和宽重新缩放到相同的<span class="math inline">\(H/s_{base},W/s_{base}\)</span>，其中<span class="math inline">\(H,W\)</span>是输入图像的高和宽，并将它们放在3D空间中的x轴和y轴上对齐。</p>
+<figure>
+<img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211041039003.png" srcset="/img/loading.gif" lazyload alt="3D feature sampling process" /><figcaption aria-hidden="true">3D feature sampling process</figcaption>
+</figure>
+<p><strong>Adaptive 3D feature sampling process</strong></p>
+<p>一个query首先通过一个线性层生成针对点的偏移向量集合<span class="math inline">\(P_{in},\{(\Delta x_i,\Delta y_i, \Delta z_i)\}_{P_{in}}\)</span>： <span class="math display">\[
+\{(\Delta x_i,\Delta y_i, \Delta z_i)\}_{P_{in}}={\rm Linear}(\mathbf{q})
+\]</span> 然后，根据query <span class="math inline">\(i\)</span>的的位置向量将这些偏移量转化为采样位置： <span class="math display">\[
+\left\{\begin{matrix} 
+\tilde{x}_i=x+\Delta x_i\cdot 2^{z-r},\\ 
+\tilde{y}_i=y+\Delta y_i\cdot 2^{z+r}, \\
+\tilde{z}_i=z+\Delta z_i,
+\end{matrix}\right.
+\]</span> 值得注意的是，从query中解码用来描述bounding box的区域<span class="math inline">\(\{\Delta x_i,\Delta y_i\in[-0.5,0.5]\}\)</span>。偏移量并不限于此范围内，这就意味着query可以在bounding box外进行采样。得到集合后，采样器即可在3D空间内对给定的点进行采样。在现有的实现中，3D空间内的插值是组合实现的：首先在<span class="math inline">\((x,y)\)</span>平面内通过双线性插值对给定点进行采样，然后在给定采样<span class="math inline">\(\tilde{z}\)</span>的情况下通过高斯加权对z轴进行采样，其中特征图<span class="math inline">\(j\)</span>的权重为： <span class="math display">\[
+\tilde{w}_j=\frac{\exp(-(\tilde{z}-z_j^{feat})^2/\tau_z)}{\sum_j\exp(-(\tilde{z}-z_j^{feat})^2\tau_z)}
+\]</span> 其中<span class="math inline">\(\tau_z\)</span>是z轴上插值的软化系数，在本文中取<span class="math inline">\(\tau_z=2\)</span>。特征图的通道数为<span class="math inline">\(d_{feat}\)</span>，采样特征矩阵<span class="math inline">\(\mathbf{x}\)</span>的形状为<span class="math inline">\(\mathbb{R}^{p_{in}\times d_{feat}}\)</span>。通过利用显式、自适应的一致的位置信息和与query对应的尺度进行采样，自适应3D特征采样处理简化了decoder 的学习过程。</p>
+<p><strong>Group sampling</strong></p>
+<p>为了尽可能采样多点的特征，引入了群体采样机制，类似于注意力机制中的多头注意力和群体卷积。群体采样首先将3D特征空间的通道数<span class="math inline">\(d_{feat}\)</span>分成<span class="math inline">\(g\)</span>组，每组为<span class="math inline">\(d_{feat}/g\)</span>，每组分别进行3D采样。采用分组采样机制，对于每个query，decoder可以生成<span class="math inline">\(g\cdot P_{in}\)</span>组偏移向量，来丰富采样点的多样性，利用这些点更丰富的空间结构特征。采样特征矩阵<span class="math inline">\(\mathbf{x}\)</span>的形状就变成了<span class="math inline">\(\mathbb{R}^{g\times P_{in}\times (d_{feat}/g)}\)</span>。</p>
+<h5 id="adaptive-content-decoding">Adaptive Content Decoding</h5>
+<p>为了捕获<span class="math inline">\(\mathbf{x}\)</span>空间和通道维数的相关性，提出了分别对每个维数中的内容的有效解码。设计了一个MLP-mixer的简化、自适应变体，进行自适应混合，动态混合权重类似于卷积中的dynamic filters。</p>
+<figure>
+<img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211041455275.png" srcset="/img/loading.gif" lazyload alt="Adaptive mixing procedure" /><figcaption aria-hidden="true">Adaptive mixing procedure</figcaption>
+</figure>
+<p>如上图所示，在query的参与下，依次进行自适应通道混合和自适应空间混合，以利用自适应通道语义信息和空间结构。</p>
+<p><strong>Adaptive channel mixing</strong></p>
+<p>给定一个query的采样特征矩阵<span class="math inline">\(\mathbf{x}\in\mathbb{R}^{P_{in}\times C}\)</span>，其中<span class="math inline">\(C=d_{feat/g}\)</span>，自适应通道混合（ACM）会使用基于<span class="math inline">\(\mathbf{q}\)</span>的动态权重在通道维数对<span class="math inline">\(\mathbf{x}\)</span>进行转换以自适应地增强通道语义： <span class="math display">\[
+M_c={\rm Linear}(\mathbf{q})\in\mathbb{R}^{C\times C}
+\]</span></p>
+<p><span class="math display">\[
+{\rm ACM}(\mathbf{x})={\rm ReLU(LayerNorm}(\mathbf{x}M_c)),
+\]</span></p>
+<p>其中<span class="math inline">\({\rm ACM}(\mathbf{x})\in\mathbb{R}^{P_{in}\times C}\)</span>是通道混合特征的输出，线性层对于每一组都是独立的。然后对混合输出的所有维度都进行层正则化。在这一步中，动态权重在3D空间中的不同采样点之间是共享的，类似于Sparse R-CNN中RoI特征的<span class="math inline">\(1\times1\)</span>的自适应卷积。</p>
+<p><strong>Adaptive spatial mixing</strong></p>
+<p>为了使query对采样特征的空间结构自适应，引入了自适应空间混合（ASM）。如上图所示，先对通道混合特征矩阵进行转置，然后对其空间维度应用动态核： <span class="math display">\[
+M_s={\rm Linear}(\mathbf{q})\in\mathbb{R}^{P_{int}\times P_{out}}
+\]</span></p>
+<p><span class="math display">\[
+{\rm ASM}(\mathbf{x})={\rm ReLU(LayerNorm)}(\mathbf{x}^T M_s),
+\]</span></p>
+<p>其中<span class="math inline">\({\rm ASM}(\mathbf{x})\in\mathbb{R}^{C\times P_{out}}\)</span>是空间混合输出，<span class="math inline">\(P_{out}\)</span>是空间混合输出数量。动态权重在不同通道间是共享的。由于采样点可能来自不同的特征尺度，ASM自然需要涉及多尺度交互建模，这对于实现高性能目标检测是非常必要的。</p>
+<h5 id="overall-adamixer-detector">Overall AdaMixer Detector</h5>
+<figure>
+<img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211081547831.png" srcset="/img/loading.gif" lazyload alt="decoder structure of the AdaMixer" /><figcaption aria-hidden="true">decoder structure of the AdaMixer</figcaption>
+</figure>
+<p>query的位置向量在阶段结束后由另一个FFN来做更新： <span class="math display">\[
+x^\prime = x+\Delta x\cdot 2^z,y^\prime=t+\Delta y\cdot2^z,
+\]</span></p>
+<p><span class="math display">\[
+z^\prime=z+\Delta z,r^\prime=r+\Delta r,
+\]</span></p>
+<p>其中<span class="math inline">\((\Delta x,\Delta y, \Delta z,\Delta r)\)</span>是由小的FFN块产生的。</p>
+<p><strong>Position-aware multi-head self-attentions</strong></p>
+<p>由于对query进行了解耦，分离出了内容和位置向量，内容向量间原始的多头自注意力机制不知道一个query与另外一个query之间的几何关系，这被证明有利于抑制冗余检测。为了实现这一点，我们将位置信息嵌入到自注意力中。正弦形式的内容向量的位置信息和<span class="math inline">\((x,y,z,r)\)</span>组件嵌入占用了四分之一的通道。我们还将前景交集（IoF）作为query间注意力权重的偏置嵌入到query中，以显式地包含query间被包含的关系。对于每个注意力头： <span class="math display">\[
+{\rm Attn}(Q,K,V)={\rm Softmax}(QK^T/\sqrt{d_q}+\alpha B)V,
+\]</span> 其中<span class="math inline">\(B_{ij}=\log(|box_i\cap box_j|/|box_i|+\epsilon)\)</span>,<span class="math inline">\(\epsilon=10^{-7}\)</span>,<span class="math inline">\(Q,K,V\in\mathbb{R}^{N\times d_q}\)</span>代表query、key和value矩阵，<span class="math inline">\(\alpha\)</span>是每个头的可学习参数。<span class="math inline">\(B_{ij}=0\)</span>代表box <span class="math inline">\(i\)</span>完全包含在box <span class="math inline">\(j\)</span>中，<span class="math inline">\(B_{ij}=\log\epsilon\ll0\)</span>代表box <span class="math inline">\(i\)</span>和<span class="math inline">\(j\)</span>之间没有重叠。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/" class="category-chain-item">论文阅读</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">#论文阅读</a>
+      
+        <a href="/tags/Object-Detection/">#Object Detection</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>[论文阅读]AdaMixer: A Fast-Converging Query-Based Object Detector</div>
+      <div>http://k0145vin.com/2022/11/08/论文阅读-AdaMixer-A-Fast-Converging-Query-Based-Object-Detector/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>一瓶AD钙</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年11月8日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/11/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" title="动手学深度学习">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">动手学深度学习</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/10/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Accelerating-DETR-Convergence-via-Semantic-Aligned-Matching/" title="[论文阅读]Accelerating DETR Convergence via Semantic-Aligned Matching">
+                        <span class="hidden-mobile">[论文阅读]Accelerating DETR Convergence via Semantic-Aligned Matching</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      陕ICP备2022003183号-1
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.1/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

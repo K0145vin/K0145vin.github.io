@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+  
+  <entry>
+    <title>动手学深度学习</title>
+    <link href="/2022/11/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    <url>/2022/11/25/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</url>
+    
+    <content type="html"><![CDATA[<h1 id="动手学深度学习">动手学深度学习</h1><p>GitHub地址：<img src="https://github.com/d2l-ai/d2l-zh" alt="https://github.com/d2l-ai/d2l-zh" /></p><h2 id="线性回归网络">线性回归网络</h2><h3 id="线性回归">线性回归</h3><h4 id="线性模型">线性模型</h4><p><span class="math display">\[\hat{\mathbf{y}}=\mathbf{Xw} + b\]</span></p><h4 id="损失函数">损失函数</h4><p><span class="math display">\[l^{(i)}(\mathbf{w}, b) = \frac{1}{2} \left(\hat{y}^{(i)} - y^{(i)}\right)^2.\]</span></p><p><span class="math display">\[L(\mathbf{w}, b) =\frac{1}{n}\sum_{i=1}^n l^{(i)}(\mathbf{w}, b) =\frac{1}{n} \sum_{i=1}^n \frac{1}{2}\left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right)^2.\]</span></p><p><span class="math display">\[\mathbf{w}^*, b^* = \operatorname*{argmin}_{\mathbf{w}, b}\  L(\mathbf{w}, b).\]</span></p><h4 id="解析解">解析解</h4><p>线性回归的解可以用一个共识简单地表达出来，这类解叫做解析解。将偏置<span class="math inline">\(b\)</span>合并到参数<span class="math inline">\(\mathbf{w}\)</span>中，合并方法是所有参数的矩阵中附加一列。预测问题是最小化<span class="math inline">\(\|\mathbf{y} - \mathbf{X}\mathbf{w}\|^2\)</span>。这在损失平面上只有一个临界点，这个临界点对应于整个区域的损失极小点。将损失关于<span class="math inline">\(\mathbf{w}\)</span>的导数设为0，得到解析解： <span class="math display">\[\mathbf{w}^* = (\mathbf X^\top \mathbf X)^{-1}\mathbf X^\top \mathbf{y}.\]</span> 但不是所有问题都存在解析解。解析解可以进行很好的数学分析，但是对问题的限制很严格，无法广泛应用于深度学习。</p><h4 id="随机梯度下降">随机梯度下降</h4><p>随机梯度下降通过不断地在损失函数递减的方向上更新参数来降低误差。</p><p>梯度下降最简单的用法是计算损失函数（数据集中所有样本的损失均值）关于模型参数的导数（在这里可以称为梯度）。但是由于整个数据集可能会很大，遍历一遍的速度很慢，所以可以随机抽取一小批样本，这样的变体称为小批量随机梯度下降。</p><p>对于每次迭代，先随机抽样一个小批量<span class="math inline">\(\mathcal{B}\)</span>，计算小批量的平均损失关于模型参数的导数（或梯度）。最后，将梯度乘学习率<span class="math inline">\(\eta\)</span>,并从当前参数中减掉。</p><p>用数学公式表示为（<span class="math inline">\(\partial\)</span>表示偏导数）： <span class="math display">\[(\mathbf{w},b) \leftarrow (\mathbf{w},b) - \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}} \partial_{(\mathbf{w},b)} l^{(i)}(\mathbf{w},b).\]</span> <span class="math display">\[\begin{split}\begin{aligned} \mathbf{w} &amp;\leftarrow \mathbf{w} -   \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}} \partial_{\mathbf{w}} l^{(i)}(\mathbf{w}, b) = \mathbf{w} - \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}} \mathbf{x}^{(i)} \left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right),\\ b &amp;\leftarrow b -  \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}} \partial_b l^{(i)}(\mathbf{w}, b)  = b - \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}} \left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right). \end{aligned}\end{split}\]</span></p><h4 id="正态分布与平方损失">正态分布与平方损失</h4><p>若随机变量<span class="math inline">\(x\)</span>具有均值<span class="math inline">\(\mu\)</span>和方差<span class="math inline">\(\sigma^2\)</span>（标准差<span class="math inline">\(\sigma\)</span>），其正态分布概率密度函数如下： <span class="math display">\[p(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\left(-\frac{1}{2 \sigma^2} (x - \mu)^2\right).\]</span></p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">normal</span>(<span class="hljs-params">x, mu, sigma</span>):<br>    p = <span class="hljs-number">1</span> / math.sqrt(<span class="hljs-number">2</span> * math.pi * sigma**<span class="hljs-number">2</span>)<br>    <span class="hljs-keyword">return</span> p * np.exp(-<span class="hljs-number">0.5</span> / sigma**<span class="hljs-number">2</span> * (x - mu)**<span class="hljs-number">2</span>)<br></code></pre></td></tr></table></figure><p>均方误差损失函数（简称均方损失）可以用于线性回归的一个原因是：假设观测中包含噪声，其中噪声服从正态分布。噪声正态分布如下式： <span class="math display">\[y = \mathbf{w}^\top \mathbf{x} + b + \epsilon,\]</span> 其中，<span class="math inline">\(\epsilon \sim \mathcal{N}(0, \sigma^2)\)</span>。</p><p>因此，我们现在可以写出通过给定<span class="math inline">\(\mathbf{x}\)</span>的观测到特定<span class="math inline">\(y\)</span>的似然（likelihood）: <span class="math display">\[P(y \mid \mathbf{x}) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\left(-\frac{1}{2 \sigma^2} (y - \mathbf{w}^\top \mathbf{x} - b)^2\right).\]</span> 现在，根据极大似然估计法，参数<span class="math inline">\(\mathbf{w}\)</span>和<span class="math inline">\(b\)</span>的最优值是使整个数据集的似然最大的值： <span class="math display">\[P(\mathbf y \mid \mathbf X) = \prod_{i=1}^{n} p(y^{(i)}|\mathbf{x}^{(i)}).\]</span> 使用对数来简化指数函数的乘积最大化问题，变为最小化负对数似然<span class="math inline">\(-\log P(\mathbf y \mid \mathbf X)\)</span>： <span class="math display">\[-\log P(\mathbf y \mid \mathbf X) = \sum_{i=1}^n \frac{1}{2} \log(2 \pi \sigma^2) + \frac{1}{2 \sigma^2} \left(y^{(i)} - \mathbf{w}^\top \mathbf{x}^{(i)} - b\right)^2.\]</span></p><h3 id="softmax回归">softmax回归</h3><h4 id="softmax运算">softmax运算</h4><p>不能将未规范化的预测<span class="math inline">\(o\)</span>直接输出，因为没有限制这些数字的总和为1，且可能出现负值。运用softmax函数进行校准： <span class="math display">\[\hat{\mathbf{y}} = \mathrm{softmax}(\mathbf{o})\quad \text{其中}\quad \hat{y}_j = \frac{\exp(o_j)}{\sum_k \exp(o_k)}\]</span> 这里，对于所有的<span class="math inline">\(j\)</span>总有<span class="math inline">\(0 \leq \hat{y}_j \leq 1\)</span>。输出最有可能的类别： <span class="math display">\[\operatorname*{argmax}_j \hat y_j = \operatorname*{argmax}_j o_j.\]</span></p><h4 id="小批量样本的矢量化">小批量样本的矢量化</h4><p>读入一个批量的样本<span class="math inline">\(\mathbf{X}\)</span>，特征维度（输入数量）为<span class="math inline">\(d\)</span>，批量大小为<span class="math inline">\(n\)</span>。输出时有<span class="math inline">\(q\)</span>个类别。那么小批量样本的特征为<span class="math inline">\(\mathbf{X} \in \mathbb{R}^{n \times d}\)</span>，权重为<span class="math inline">\(\mathbf{W} \in \mathbb{R}^{d \times q}\)</span>，偏置为<span class="math inline">\(\mathbf{b} \in \mathbb{R}^{1\times q}\)</span>。softmax回归的矢量计算表达式为： <span class="math display">\[\begin{split}\begin{aligned} \mathbf{O} &amp;= \mathbf{X} \mathbf{W} + \mathbf{b}, \\ \hat{\mathbf{Y}} &amp; = \mathrm{softmax}(\mathbf{O}). \end{aligned}\end{split}\]</span></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>学习</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>PyTorch</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>[论文阅读]AdaMixer: A Fast-Converging Query-Based Object Detector</title>
+    <link href="/2022/11/08/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-AdaMixer-A-Fast-Converging-Query-Based-Object-Detector/"/>
+    <url>/2022/11/08/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-AdaMixer-A-Fast-Converging-Query-Based-Object-Detector/</url>
+    
+    <content type="html"><![CDATA[<p>TransformerEncoder、MultiScale Deformable TransformerEncoder、FPN增加了计算成本，训练需要大量的时间和数据。</p><p>提高跨图像解码查询的适应性</p><h5 id="object-query-decoder-revisited">Object Query Decoder Revisited</h5><figure><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211031125595.png" alt="Comparisons" /><figcaption aria-hidden="true">Comparisons</figcaption></figure><h5 id="our-object-query-definition">Our Object Query Definition</h5><p>根据object query的定义，还是将一个query解耦为两个向量：content vector <span class="math inline">\(\mathrm{q}\)</span>和positional vetor <span class="math inline">\((x,y,z,r)\)</span>。content vector <span class="math inline">\(\mathbf{q}\)</span>是<span class="math inline">\(\mathbb{R}^{d_q}\)</span>中的一个向量，<span class="math inline">\(d_q\)</span>是通道维数。向量<span class="math inline">\((x,y,z,r)\)</span>中<span class="math inline">\(x,y\)</span>是bounding box的中心坐标，<span class="math inline">\(z\)</span>是框大小的对数，<span class="math inline">\(r\)</span>是长宽比的对数。<span class="math inline">\(x,y,z\)</span>还可以直接表示3D特征空间中query的坐标。</p><p><strong>Decoding the bounding box from a query</strong></p><p>可以从位置编码中解码边界框信息。中心点<span class="math inline">\((x_B,y_B)\)</span>，宽和高<span class="math inline">\(w_B,h_B\)</span>解码： <span class="math display">\[x_B=s_{base}\cdot x,y_B=s_{base}\cdot y\]</span></p><p><span class="math display">\[w_B=s_{base}\cdot 2^{z-r},h_B=s_{base}\cdot 2^{z+r}\]</span></p><p><span class="math inline">\(s_{base}\)</span>是下采样步长偏移量，根据实验一般设置为<span class="math inline">\(s_{base}=4\)</span>。</p><h5 id="adaptive-location-sampling">Adaptive Location Sampling</h5><p>decoder应该自适应地针对query决定采样哪个特征。也就是说，decoder应该同时考虑位置向量<span class="math inline">\((x,y,z,r)\)</span>和内容向量<span class="math inline">\(\mathbf{q}\)</span>对采样位置进行采样位置进行解码。此外，decoder不仅要在<span class="math inline">\((x,y)\)</span>空间上是自适应的，在潜在目标的尺度上也要是自适应的。具体来说，通过将多尺度特征看作一个三维特征空间，自适应地从中采样。</p><p><strong>Multi- scale features as the 3D feature space</strong></p><p>给定一个索引为<span class="math inline">\(j\)</span>，下采样步长为<span class="math inline">\(s_j^{feat}\)</span>的特征图，先通过线性映射到相同的通道数<span class="math inline">\(d_{feat}\)</span>，然后计算z轴坐标： <span class="math display">\[z_j^{feat}=\log_2(s_j^{feat}/s_{base})\]</span> 然后将不同步长的特征图的高和宽重新缩放到相同的<span class="math inline">\(H/s_{base},W/s_{base}\)</span>，其中<span class="math inline">\(H,W\)</span>是输入图像的高和宽，并将它们放在3D空间中的x轴和y轴上对齐。</p><figure><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211041039003.png" alt="3D feature sampling process" /><figcaption aria-hidden="true">3D feature sampling process</figcaption></figure><p><strong>Adaptive 3D feature sampling process</strong></p><p>一个query首先通过一个线性层生成针对点的偏移向量集合<span class="math inline">\(P_{in},\{(\Delta x_i,\Delta y_i, \Delta z_i)\}_{P_{in}}\)</span>： <span class="math display">\[\{(\Delta x_i,\Delta y_i, \Delta z_i)\}_{P_{in}}={\rm Linear}(\mathbf{q})\]</span> 然后，根据query <span class="math inline">\(i\)</span>的的位置向量将这些偏移量转化为采样位置： <span class="math display">\[\left\{\begin{matrix} \tilde{x}_i=x+\Delta x_i\cdot 2^{z-r},\\ \tilde{y}_i=y+\Delta y_i\cdot 2^{z+r}, \\\tilde{z}_i=z+\Delta z_i,\end{matrix}\right.\]</span> 值得注意的是，从query中解码用来描述bounding box的区域<span class="math inline">\(\{\Delta x_i,\Delta y_i\in[-0.5,0.5]\}\)</span>。偏移量并不限于此范围内，这就意味着query可以在bounding box外进行采样。得到集合后，采样器即可在3D空间内对给定的点进行采样。在现有的实现中，3D空间内的插值是组合实现的：首先在<span class="math inline">\((x,y)\)</span>平面内通过双线性插值对给定点进行采样，然后在给定采样<span class="math inline">\(\tilde{z}\)</span>的情况下通过高斯加权对z轴进行采样，其中特征图<span class="math inline">\(j\)</span>的权重为： <span class="math display">\[\tilde{w}_j=\frac{\exp(-(\tilde{z}-z_j^{feat})^2/\tau_z)}{\sum_j\exp(-(\tilde{z}-z_j^{feat})^2\tau_z)}\]</span> 其中<span class="math inline">\(\tau_z\)</span>是z轴上插值的软化系数，在本文中取<span class="math inline">\(\tau_z=2\)</span>。特征图的通道数为<span class="math inline">\(d_{feat}\)</span>，采样特征矩阵<span class="math inline">\(\mathbf{x}\)</span>的形状为<span class="math inline">\(\mathbb{R}^{p_{in}\times d_{feat}}\)</span>。通过利用显式、自适应的一致的位置信息和与query对应的尺度进行采样，自适应3D特征采样处理简化了decoder 的学习过程。</p><p><strong>Group sampling</strong></p><p>为了尽可能采样多点的特征，引入了群体采样机制，类似于注意力机制中的多头注意力和群体卷积。群体采样首先将3D特征空间的通道数<span class="math inline">\(d_{feat}\)</span>分成<span class="math inline">\(g\)</span>组，每组为<span class="math inline">\(d_{feat}/g\)</span>，每组分别进行3D采样。采用分组采样机制，对于每个query，decoder可以生成<span class="math inline">\(g\cdot P_{in}\)</span>组偏移向量，来丰富采样点的多样性，利用这些点更丰富的空间结构特征。采样特征矩阵<span class="math inline">\(\mathbf{x}\)</span>的形状就变成了<span class="math inline">\(\mathbb{R}^{g\times P_{in}\times (d_{feat}/g)}\)</span>。</p><h5 id="adaptive-content-decoding">Adaptive Content Decoding</h5><p>为了捕获<span class="math inline">\(\mathbf{x}\)</span>空间和通道维数的相关性，提出了分别对每个维数中的内容的有效解码。设计了一个MLP-mixer的简化、自适应变体，进行自适应混合，动态混合权重类似于卷积中的dynamic filters。</p><figure><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211041455275.png" alt="Adaptive mixing procedure" /><figcaption aria-hidden="true">Adaptive mixing procedure</figcaption></figure><p>如上图所示，在query的参与下，依次进行自适应通道混合和自适应空间混合，以利用自适应通道语义信息和空间结构。</p><p><strong>Adaptive channel mixing</strong></p><p>给定一个query的采样特征矩阵<span class="math inline">\(\mathbf{x}\in\mathbb{R}^{P_{in}\times C}\)</span>，其中<span class="math inline">\(C=d_{feat/g}\)</span>，自适应通道混合（ACM）会使用基于<span class="math inline">\(\mathbf{q}\)</span>的动态权重在通道维数对<span class="math inline">\(\mathbf{x}\)</span>进行转换以自适应地增强通道语义： <span class="math display">\[M_c={\rm Linear}(\mathbf{q})\in\mathbb{R}^{C\times C}\]</span></p><p><span class="math display">\[{\rm ACM}(\mathbf{x})={\rm ReLU(LayerNorm}(\mathbf{x}M_c)),\]</span></p><p>其中<span class="math inline">\({\rm ACM}(\mathbf{x})\in\mathbb{R}^{P_{in}\times C}\)</span>是通道混合特征的输出，线性层对于每一组都是独立的。然后对混合输出的所有维度都进行层正则化。在这一步中，动态权重在3D空间中的不同采样点之间是共享的，类似于Sparse R-CNN中RoI特征的<span class="math inline">\(1\times1\)</span>的自适应卷积。</p><p><strong>Adaptive spatial mixing</strong></p><p>为了使query对采样特征的空间结构自适应，引入了自适应空间混合（ASM）。如上图所示，先对通道混合特征矩阵进行转置，然后对其空间维度应用动态核： <span class="math display">\[M_s={\rm Linear}(\mathbf{q})\in\mathbb{R}^{P_{int}\times P_{out}}\]</span></p><p><span class="math display">\[{\rm ASM}(\mathbf{x})={\rm ReLU(LayerNorm)}(\mathbf{x}^T M_s),\]</span></p><p>其中<span class="math inline">\({\rm ASM}(\mathbf{x})\in\mathbb{R}^{C\times P_{out}}\)</span>是空间混合输出，<span class="math inline">\(P_{out}\)</span>是空间混合输出数量。动态权重在不同通道间是共享的。由于采样点可能来自不同的特征尺度，ASM自然需要涉及多尺度交互建模，这对于实现高性能目标检测是非常必要的。</p><h5 id="overall-adamixer-detector">Overall AdaMixer Detector</h5><figure><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202211081547831.png" alt="decoder structure of the AdaMixer" /><figcaption aria-hidden="true">decoder structure of the AdaMixer</figcaption></figure><p>query的位置向量在阶段结束后由另一个FFN来做更新： <span class="math display">\[x^\prime = x+\Delta x\cdot 2^z,y^\prime=t+\Delta y\cdot2^z,\]</span></p><p><span class="math display">\[z^\prime=z+\Delta z,r^\prime=r+\Delta r,\]</span></p><p>其中<span class="math inline">\((\Delta x,\Delta y, \Delta z,\Delta r)\)</span>是由小的FFN块产生的。</p><p><strong>Position-aware multi-head self-attentions</strong></p><p>由于对query进行了解耦，分离出了内容和位置向量，内容向量间原始的多头自注意力机制不知道一个query与另外一个query之间的几何关系，这被证明有利于抑制冗余检测。为了实现这一点，我们将位置信息嵌入到自注意力中。正弦形式的内容向量的位置信息和<span class="math inline">\((x,y,z,r)\)</span>组件嵌入占用了四分之一的通道。我们还将前景交集（IoF）作为query间注意力权重的偏置嵌入到query中，以显式地包含query间被包含的关系。对于每个注意力头： <span class="math display">\[{\rm Attn}(Q,K,V)={\rm Softmax}(QK^T/\sqrt{d_q}+\alpha B)V,\]</span> 其中<span class="math inline">\(B_{ij}=\log(|box_i\cap box_j|/|box_i|+\epsilon)\)</span>,<span class="math inline">\(\epsilon=10^{-7}\)</span>,<span class="math inline">\(Q,K,V\in\mathbb{R}^{N\times d_q}\)</span>代表query、key和value矩阵，<span class="math inline">\(\alpha\)</span>是每个头的可学习参数。<span class="math inline">\(B_{ij}=0\)</span>代表box <span class="math inline">\(i\)</span>完全包含在box <span class="math inline">\(j\)</span>中，<span class="math inline">\(B_{ij}=\log\epsilon\ll0\)</span>代表box <span class="math inline">\(i\)</span>和<span class="math inline">\(j\)</span>之间没有重叠。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>论文阅读</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>论文阅读</tag>
+      
+      <tag>Object Detection</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>[论文阅读]Accelerating DETR Convergence via Semantic-Aligned Matching</title>
+    <link href="/2022/10/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Accelerating-DETR-Convergence-via-Semantic-Aligned-Matching/"/>
+    <url>/2022/10/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Accelerating-DETR-Convergence-via-Semantic-Aligned-Matching/</url>
+    
+    <content type="html"><![CDATA[<p>收敛缓慢的原因：初始状态下，每个object query要跟所有的空间位置进行匹配，需要相当长的训练周期来学习与目标相关的区域。SMCA-DETR、Conditional DETR、Deformable DETR中都有提及。</p><p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202210292148854.png" /></p><p>造成object query无法正确聚焦于特定区域的原因是Cross-Attention之间的多个模块（Self-Attention和FFN）对object query进行了多次映射，使得object query与图像特征F的语义未对齐，也就是说，object query和图像特征F被映射到了不同的嵌入空间（Embedding Space）内。</p><p>Deformable DETR用可形变注意力机制代替原来的全局密集注意力，只关注小部分的特征</p><p>Conditional DETR、SMCA-DETR将交叉注意力模块改为空间条件化的。</p><p>Motivation: Siamese-based architecture 孪生结构</p><figure><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202210292147420.jpeg" alt="decoder_layer" /><figcaption aria-hidden="true">decoder_layer</figcaption></figure><p>通过两个相同的子网络将匹配双方的语义对齐，以投影到相同的embedding space，便于后续匹配。为object query提供了一个强大的先验，使其只关注于语义相似的区域上。</p><p>物体的关键点和端点在目标识别和定位中非常重要，显式地搜索多个显著点，并用于语义对齐匹配</p><p>交叉注意力模块-&gt;匹配与蒸馏 <span class="math display">\[\rm\mathbf{Q}^{\prime}=\underbrace{\overbrace{Softmax(\frac{(\mathbf{QW}_q)(\mathbf{FW}_k)^T}{\sqrt{d}}}^{匹配相关区域}(\mathbf{FW}_v)}_{从匹配区域中提取特征}\]</span> 给定编码图像特征<span class="math inline">\(\mathbf{F}\)</span>和object queries的参考框<span class="math inline">\(\mathbf{R}_{box}\)</span>，<span class="math inline">\(HW\times d\Rightarrow H\times W \times d\)</span>，RoIAlign： <span class="math display">\[\rm\mathbf{F}_R=RoIAlign(\mathbf{F},\mathbf{R}_{box})\]</span> <span class="math inline">\(\rm\mathbf{F}_R\in \mathbb{R}^{N\times 7\times 7\times d}\)</span> <span class="math display">\[\rm\mathbf{Q}^{new},\mathbf{Q}_{pos}^{new}=Resample(\mathbf{F}_{R},\mathbf{R}_{box},\mathbf{Q})\]</span> <span class="math inline">\(\rm\mathbf{Q}^{new},\mathbf{Q}_{pos}^{new}\)</span>是通过<span class="math inline">\(\rm\mathbf{F}_R\)</span>重采样得到的，不涉及任何投影，因而object query embedding<span class="math inline">\(\rm\mathbf{Q}^{new}\)</span>跟<span class="math inline">\(\mathbf{F}\)</span>共享相同的嵌入空间，为object queries提供先验关注语义相似的区域。</p><p>对于检测任务来说，物体的显著点是识别和定位的关键。因此选择显著点的特征作为Semantics Aligner的输出。</p><p>假设注意力头的数量为<span class="math inline">\(M\)</span>，通常设置为8。通过RoIAlign得到特征<span class="math inline">\(\rm\mathbf{F}_R\)</span>后，通过ConvNet和多层感知器每个区域预测<span class="math inline">\(M\)</span>个显著点坐标，<span class="math inline">\(\rm{\mathbf{R}_{SP}}\in\mathbb{R}^{N\times M\times 2}\)</span>. <span class="math display">\[\rm\mathbf{R}_{SP}=MLP(ConvNet(\mathbf{F}_R))\]</span> 显著点坐标的预测是限制在参考框内的，后面会进行解释。显著点的特征随后通过双线性插值从<span class="math inline">\(\rm\mathbf{F}_{R}\)</span>中采样得到。<span class="math inline">\(M\)</span>个采样特征向量连接起来作为新的object query embedding，使得每个注意力头关注一个显著点的特征。 <span class="math display">\[{\rm\mathbf{Q}^{new\prime}=Concat({\mathbf{F}_{R}}}[\dots,x,y,\dots])\,{\rm for}\, x,y\in\rm{\mathbf{R}_{SP}}\]</span></p><p><span class="math display">\[\rm\mathbf{Q}_{pos}^{new\prime}=Concat(Sinusoidal(\mathbf{R}_{box},\mathbf{R}_{SP}))\]</span></p><p>Semantics Aligner高效地产生了与编码图像特征语义对齐的object queries，但是同时也产生了问题：之前的query embedding <span class="math inline">\(\mathbf{Q}\)</span>包含的对检测有价值的信息并没有应用到交叉注意力模块中。</p><p>又利用先前的query embedding作为输入通过线性投影和sigmoid函数产生了重加权系数。通过与重加权系数相乘，新产生的query embedding和对应的position embedding都被重加权来突出重要特征，有效地利用先前的有价值的信息 <span class="math display">\[\rm\mathbf{Q}^{new}=\mathbf{Q}^{new\prime}\otimes \sigma(\mathbf{QW}_{RW1})\]</span></p><p><span class="math display">\[\rm\mathbf{Q}_{pos}^{new}=\mathbf{Q}_{pos}^{new\prime}\otimes \sigma(\mathbf{QW}_{RW2})\]</span></p><p><span class="math inline">\(\rm\mathbf{W}_{RW1},\mathbf{W}_{RW2}\)</span>是线性投影，<span class="math inline">\(\sigma\)</span>是sigmoid函数，<span class="math inline">\(\otimes\)</span>是逐元素相乘</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>论文阅读</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>论文阅读</tag>
+      
+      <tag>Object Detection</tag>
+      
+      <tag>DETR-like</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>[论文阅读] Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention</title>
+    <link href="/2022/10/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Transformers-are-RNNs-Fast-Autoregressive-Transformers-with-Linear-Attention/"/>
+    <url>/2022/10/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Transformers-are-RNNs-Fast-Autoregressive-Transformers-with-Linear-Attention/</url>
+    
+    <content type="html"><![CDATA[<p>之前的工作证明了多头自注意力只要有足够的注意力头数就可以表示任意的卷积层。但是，本文反向表明，用自回归目标训练的自注意力层可以被看作是一个RNN，可以显著加快自回归transformer模型的推理时间。</p><h5 id="transformer">Transformer</h5><p><span class="math inline">\(x\in\mathbb{R}^{N\times F}\)</span>,<span class="math inline">\(N\)</span>个<span class="math inline">\(F\)</span>维的特征向量。Transformer即一个函数<span class="math inline">\(T:\mathbb{R}^{N\times F}\rightarrow\mathbb{R}^{N\times F}\)</span>，由<span class="math inline">\(L\)</span>个transformer层<span class="math inline">\(T_{1}(\cdot),\dots,T_{L}(\cdot)\)</span>组成: <span class="math display">\[T_{l}(x)=f_{l}(A_{l}(x)+x).\]</span> <span class="math inline">\(A_l(\cdot)\)</span>代表自注意力函数。输入序列<span class="math inline">\(x\)</span>由三个矩阵<span class="math inline">\(W_Q\in\mathbb{R}^{F\times D}，W_K\in\mathbb{R}^{F\times D},W_v\in\mathbb{R}^{F\times M}\)</span>映射到<span class="math inline">\(Q,K,V\)</span>，<span class="math inline">\(A_l(x)=V^\prime\)</span> <span class="math display">\[Q=xW_Q,\\K=xW_K,\\V=xW_V,\\A_l(x)=V^\prime={\rm softmax}(\frac{QK^T}{\sqrt{D}})V.\]</span> softmax函数按行应用于<span class="math inline">\(QK^T\)</span>,<span class="math inline">\(Q,K,V\)</span>分别表示queries、keys和values。</p><p>式2表示了一种特定形式的注意力，称为softmax注意力，其中相似性是由<span class="math inline">\(Q\)</span>和<span class="math inline">\(K\)</span>的点积的指数表示的。给定一个下标<span class="math inline">\(i\)</span>，返回一个矩阵的第<span class="math inline">\(i\)</span>行作为一个向量，对于任意相似性函数，可以写出一个广义的注意力方程： <span class="math display">\[V_i^\prime=\frac{\sum_{j=1}^N{\rm sim}(Q_i,K_j)V_j}{\sum_{j=1}^N{\rm sim}(Q_i,K_j)}\]</span> 将式3中的相似性函数<span class="math inline">\({\rm sim}(q,k)\)</span>替代为<span class="math inline">\(\exp(\frac{q^Tk}{\sqrt{D}})\)</span>，则与式2等价。</p><h5 id="linearized-attention">Linearized Attention</h5><p>式2中注意力的定义具有一般性，可以用来定义一些其他的注意力，如多项式注意力和RBF核注意力。为了使式3定义一个注意力函数，需要对<span class="math inline">\(sim(\cdot)\)</span>施加一个非负的约束。<span class="math inline">\(k(x,y):\mathbb{R}^{2\times F}\rightarrow\mathbb{R}_{+}\)</span></p><p>给定一个特征表示核函数<span class="math inline">\(\phi(x)\)</span>，则可以将式2重写为： <span class="math display">\[V_i^\prime=\frac{\sum_{j=1}^N\phi(Q_i)^T\phi(K_j)V_j}{\sum_{j=1}^N\phi(Q_i)^T\phi(K_j)}\]</span> 根据矩阵乘法的结合律，进一步简化： <span class="math display">\[V_i^\prime=\frac{\phi(Q_i)^T\sum_{j=1}^N\phi(K_j)V_j^T}{\phi(Q_i)^T\sum_{j=1}^N\phi(K_j)}\]</span> 当分子写成向量形式时，式5可以更简化 <span class="math display">\[(\phi(Q)\phi(K)^T)V=\phi(Q)(\phi(K)^TV)\]</span> 特征映射<span class="math inline">\(\phi(\cdot)\)</span>逐行应用于矩阵<span class="math inline">\(Q,K\)</span></p><p>对于式2，softmax注意力的计算复杂度式<span class="math inline">\(\mathcal{O}(N^2)\)</span>的，<span class="math inline">\(N\)</span>表示序列长度。空间复杂度也是相同的，因为要保存完整的注意力矩阵来计算<span class="math inline">\(Q,K,V\)</span>的梯度。</p><p>对于式5，linear transformer的时间复杂度、空间复杂度都是<span class="math inline">\(\mathcal{O}(N)\)</span>的，因为我们可以一次计算出<span class="math inline">\(\sum_{j=1}^N\phi(K_j)V_j^T\)</span>和<span class="math inline">\(\sum_{j=1}^N\phi(K_j)\)</span>并且在每个查询中重复使用。</p><p>对于softmax注意力，乘法和加法的总复杂度为<span class="math inline">\(\mathcal{O}(N^2\max(D,M))\)</span>，<span class="math inline">\(D\)</span>是<span class="math inline">\(Q,K\)</span>的维度，<span class="math inline">\(M\)</span>是<span class="math inline">\(V\)</span>的维度。</p><p>对于线性注意力，首先计算维度为<span class="math inline">\(C\)</span>的特征图，然后计算新值的加法和乘法的复杂度为<span class="math inline">\(\mathcal{O}(NCM)\)</span>。</p><p>先前的分析中并没有考虑到核函数和特征函数的选择。与指数核对应的特征函数是无穷维的，这导致不能精确地线性化softmax注意力。而另一方面，多项式核具有精确的、有限维的特征映射，并且已被证明与指数核或RBF核同样有效。计算一个2次线性化多项式transformer的复杂度为<span class="math inline">\(\mathcal{O}(ND^2M)\)</span>。</p><p>对于小序列，使用一个特征映射得到正的相似度 <span class="math display">\[\phi(x)={\rm elu}(x)+1\]</span> 相较于<span class="math inline">\({\rm relu}(\cdot)\)</span>，<span class="math inline">\({\rm elu}(\cdot)\)</span>可以避免x为负时将梯度设置为0。这样的特征映射产生的注意力计算复杂度为<span class="math inline">\(\mathcal{O}(NDM)\)</span>。</p><h5 id="causal-masking">Causal Masking</h5><p>利用transformer框架可以通过掩盖注意力高效地训练自回归模型，使得第<span class="math inline">\(i\)</span>个位置只能受到第<span class="math inline">\(j\)</span>个位置的影响，当且仅当<span class="math inline">\(j\leq i\)</span>，即一个位置不能受到后续位置的影响。由此将式3改写为： <span class="math display">\[V_i^\prime=\frac{\sum_{j=1}^i{\rm sim}(Q_i,K_j)V_j}{\sum_{j=1}^i{\rm sim}(Q_i,K_j)}.\]</span> 又由之前的推理，将掩蔽注意力线性化如下： <span class="math display">\[V_i^\prime=\frac{\phi(Q_i)^T\sum_{j=1}^i\phi(K_j)V_j^T}{\phi(Q_i)^T\sum_{j=1}^i\phi(K_j)}.\]</span> 引入<span class="math inline">\(S_i,Z_i\)</span>如下： <span class="math display">\[S_i=\sum_{j=1}^i\phi(K_j)V_j^T,\]</span></p><p><span class="math display">\[Z_i=\sum_{j=1}^i\phi(K_j),\]</span></p><p>将式9仅一步简化： <span class="math display">\[V_i^\prime=\frac{\phi(Q_i)^TS_i}{\phi(Q_I)^TZ_i}\]</span> <span class="math inline">\(S_i,Z_i\)</span>是可以由<span class="math inline">\(S_{i-1},Z_{i-1}\)</span>连续计算得到的，因而使得带有因果掩码的linear transformer的计算复杂度与序列长度称线性关系。</p><p><strong>gradient computation</strong></p><p>在任何深度学习框架中，式12的朴素实现都需要存储所有的中间值<span class="math inline">\(S_i\)</span>以计算梯度，这使得内存的消耗量最大增加<span class="math inline">\(\max(D,M)\)</span>倍，影响了对长序列或者深度模型的适用性。为解决这一问题，导出式9中的分子的梯度作为累加和。这使得我们可以在线性时间和固定的内存空间同时计算causal linear attention的前向和后向传播。</p><p>给定分子<span class="math inline">\(\bar{V_i}\)</span>和标量损失函数对于分子<span class="math inline">\(\bar{V_i}\)</span>的梯度<span class="math inline">\(\nabla_{\bar{V_i}}\mathcal{L}\)</span>，导出<span class="math inline">\(\nabla_{\phi(Q_i)\mathcal{L}},\nabla_{\phi(K_i)}\mathcal{L},\nabla_{V_i}\mathcal{L}\)</span>如下： <span class="math display">\[\nabla_{\phi(Q_i)\mathcal{L}}=\nabla_{\bar{V_i}}\mathcal{L}{\Bigg(}\sum_{j=1}^i\phi(K_j)V_j^T{\Bigg)}^T,\]</span></p><p><span class="math display">\[\nabla_{\phi(K_i)\mathcal{L}}={\Bigg(}\sum_{j=1}^N\phi(Q_j)\Big(\nabla_{\bar{V_i}}\mathcal{L}\Big)^T{\Bigg)}V_i,\]</span></p><p><span class="math display">\[\nabla_{V_i}\mathcal{L}={\Bigg(}\sum_{j=1}^N\phi(Q_j)\Big(\nabla_{\bar{V_i}}\mathcal{L}\Big)^T{\Bigg)}^T\phi(K_i).\]</span></p><p>式9、式13-15的累加和是在线性时间内、仅需关于序列长度线性比的内存空间内计算得到的。给定一个<span class="math inline">\(C\)</span>维的特征图，算法的时间复杂度为<span class="math inline">\(\mathcal{O}(NCM)\)</span>，空间复杂度为<span class="math inline">\(\mathcal{O}(N\max(C,M))\)</span></p><h5 id="summary">Summary</h5><p>这篇文章实现了线性复杂度的transformer，后续尝试把线性的transformer加到DETR类模型里跑一下，先从original DETR开始改。Facebook有后续的工作，<a href="http://arxiv.org/abs/2209.07484">Hydra Attention</a>，但是还没有开源，先挖个坑后面再看。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>论文阅读</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>论文阅读</tag>
+      
+      <tag>transformer</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>[论文阅读] Attention is All you Need</title>
+    <link href="/2022/10/28/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Attention-is-All-you-Need/"/>
+    <url>/2022/10/28/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Attention-is-All-you-Need/</url>
+    
+    <content type="html"><![CDATA[<p>encoder将符号表示的输入序列<span class="math inline">\((x_1,\dots,x_n)\)</span>映射到连续表示的序列<span class="math inline">\((z_1,\dots,z_n)\)</span>。给定<span class="math inline">\(z\)</span>，decoder再逐元素生成输出的符号序列<span class="math inline">\((y_1,\dots,y_n)\)</span>。</p><h5 id="encoder">Encoder</h5><p>encoder是由6个相同的层堆叠而成的，每层又包含2个字层，第一层是多头注意力机制，第二层是简单的全连接前馈网络。两个子层之间使用残差连接，然后进行归一化，即每个子层的输出为<span class="math inline">\({\rm LayerNorm}(x + {\rm Sublayer}(x))\)</span>。为了便于实现残差连接，所有输出的维数均为<span class="math inline">\(d_{model}=512\)</span></p><h5 id="decoder">Decoder</h5><p>decoder也是由6个相同的层堆叠而成的，除了先前提到的两个子层外，decoder还添加了第三个子层，对encoder的输出进行多头注意力。跟encoder相似，decoder在每个子层间也添加了残差连接，然后进行归一化。此外，decoder中的自注意力添加了mask机制，确保对于位置<span class="math inline">\(i\)</span>的预测是依赖小于<span class="math inline">\(i\)</span>的已知位置输出得到的。</p><figure><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202210292117897.png" alt="transformer" /><figcaption aria-hidden="true">transformer</figcaption></figure><h5 id="attention">Attention</h5><p>attention函数可以理解为将一个查询和一组键值映射到一个输出上。</p><figure><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202210292120164.png" alt="attention" /><figcaption aria-hidden="true">attention</figcaption></figure><h5 id="scaled-dot-product-attention">Scaled Dot-Product Attention</h5><p><span class="math display">\[{\rm Attention}(Q,K,V)={\rm softmax}(\frac{QK^T}{\sqrt{d_k}})V\]</span></p><h5 id="multi-head-attention">Multi-Head Attention</h5><p>与单一的注意力函数统一投影到<span class="math inline">\(d_{model}\)</span>维不同，将查询、键值分别投影到<span class="math inline">\(d_k,d_k,d_v\)</span>维有收益。在查询、键值的这些映射版本上并行执行注意力机制，生成<span class="math inline">\(d_v\)</span>维的输出，最终连接起来再次映射，得到最终输出。</p><p><span class="math inline">\({\rm MultiHead}(Q, K, V)={\rm Concat(head_1,\dots,head_h)}W^O \\ {\rm where\ head_i=Attention}(QW_i^Q,KW_i^K,VW_i^V)\)</span></p><p><span class="math inline">\(W_i^Q\in\mathbb{R}^{d_{model}\times d_k}, W_i^K\in\mathbb{R}^{d_{model}\times d_k}, W_i^V\in\mathbb{R}^{d_{model}\times d_v},W^O\in\mathbb{R}^{hd_v\times d_{model}}\)</span></p><p><span class="math inline">\(h=8,d_k=d_v=d_{model}/h=64\)</span></p><h5 id="position-wise-feed-forward-networks">Position-wise Feed-Forward Networks</h5><p>除了注意力子层外，encoder和decoder的每一层都包含一个全连接的前馈网络，分别作用于每个位置。两个线性变化中包含一个ReLU激活函数。 <span class="math display">\[{\rm FFN}(x)=\max(0, xW_1+b_1)W_2+b_2\]</span></p><p>虽然线性变换在不同位置上是相同的，但是他们使用的是不同的参数。</p><h5 id="embeddings-and-softmax">Embeddings and Softmax</h5><p>在两个embedding层和pre-softmax线性变换之间共享相同的权重矩阵。在embedding层中，将权重乘以<span class="math inline">\(\sqrt{d_{model}}\)</span></p><h5 id="position-encoding">Position Encoding</h5><p>由于模型不包含递归和卷积，为了使模型能够利用序列中的顺序信息，必须在序列中注入一些关于token相对或绝对位置的信息。为此，在encoder和decoder堆栈的底部将位置编码加到了输入中，位置编码的维度与input embedding的相同，均为<span class="math inline">\(d_{model}\)</span>，方便相加作为新的输入。计算位置编码的方式有很多，包括可学习的和固定的。</p><p>本文中，对不同的序列选择正弦和余弦函数来计算：</p><p><span class="math inline">\(PE_{(pos,2i)}=\sin(pos/10000^{2i/d_{model}})\)</span></p><p><span class="math inline">\(PE_{(pos,2i+1)}=\cos(pos/10000^{2i/d_{model}})\)</span></p><p>其中<span class="math inline">\(pos\)</span>是位置索引，<span class="math inline">\(i\)</span>是维数索引。位置编码的每个维度对应一条正弦曲线。波长呈<span class="math inline">\(2\pi\)</span>到<span class="math inline">\(100000\cdot2\pi\)</span>的几何级数。之所以选择这样的函数是因为：</p><ul><li>可以直接计算embedding不需要训练，减少了训练参数</li><li>允许模型将position embedding扩展到比训练过程中遇到的序列长度更长的序列</li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>论文阅读</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>论文阅读</tag>
+      
+      <tag>transformer</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>PyTorch学习</title>
+    <link href="/2022/10/27/PyTorch%E5%AD%A6%E4%B9%A0/"/>
+    <url>/2022/10/27/PyTorch%E5%AD%A6%E4%B9%A0/</url>
+    
+    <content type="html"><![CDATA[<ul><li>torch.nn.init.xavier_uniform_(tensor,gain=1.0)</li></ul><p>网络训练过程中容易出现梯度消失或者梯度爆炸的情况，导致大部分反向传播得到的梯度不起作用或者起反作用。因此就需要一种合理的权重初始化方法，让计算过程中的数值分布更稳定。</p><p>Xavier初始化也称Glorot初始化，出自文章<a href="http://proceedings.mlr.press/v9/glorot10a">Understanding the difficulty of training deep feedforward neural networks</a>.</p><p>输出结果将从<span class="math inline">\(\mathcal{U}(-a,a)\)</span>中采样，</p><p><span class="math display">\[a=gain\times\sqrt{\frac{6}{fan\_in+fan\_out}}\]</span></p><p>类似的函数还有torch.init.xavier_normal，结果从<span class="math inline">\(\mathcal{N}(0,std^2)\)</span>中采样，</p><p><span class="math display">\[std=gain\times\sqrt{\frac{2}{fan\_in+fan\_out}}\]</span></p><style>.center {    width: auto;    display: table;    margin-left: auto;    margin-right: auto;}</style><div class="center"><table><thead><tr class="header"><th style="text-align: center;">nonlinearity</th><th style="text-align: center;">gain</th></tr></thead><tbody><tr class="odd"><td style="text-align: center;">Linear/Identity</td><td style="text-align: center;"><span class="math inline">\(1\)</span></td></tr><tr class="even"><td style="text-align: center;">Conv{1,2,3}D</td><td style="text-align: center;"><span class="math inline">\(2\)</span></td></tr><tr class="odd"><td style="text-align: center;">Sigmoid</td><td style="text-align: center;"><span class="math inline">\(1\)</span></td></tr><tr class="even"><td style="text-align: center;">Tanh</td><td style="text-align: center;"><span class="math inline">\(\frac{5}{3}\)</span></td></tr><tr class="odd"><td style="text-align: center;">ReLu</td><td style="text-align: center;"><span class="math inline">\(\sqrt{2}\)</span></td></tr><tr class="even"><td style="text-align: center;">Leaky ReLU</td><td style="text-align: center;"><span class="math inline">\(\sqrt{\frac{2}{1+negative\_slope^2}}\)</span></td></tr><tr class="odd"><td style="text-align: center;">SELU</td><td style="text-align: center;"><span class="math inline">\(\frac{3}{4}\)</span></td></tr></tbody></table></div>]]></content>
+    
+    
+    <categories>
+      
+      <category>PyTorch</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>PyTorch</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>[论文阅读]DN-DETR: Accelerate DETR Training by Introducing Query DeNoising</title>
+    <link href="/2022/07/09/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-DN-DETR-Accelerate-DETR-Training-by-Introducing-Query-DeNoising/"/>
+    <url>/2022/07/09/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-DN-DETR-Accelerate-DETR-Training-by-Introducing-Query-DeNoising/</url>
+    
+    <content type="html"><![CDATA[<p>Carion等人创造性地将Transformer引入了目标检测领域，提出了DETR，掀起了CV业内一阵研究的热潮。DETR的提出是创造性的，但是也存在很多问题，例如收敛速度满，导致训练困难(要训练500个epochs才能达到理性的效果)。因而众多学者开始从不同方面入手，于对DETR进行优化，提出了 Dynamic DETR、DAB-DETR、Conditional DETR、Anchor DETR、Deformable DETR等DETR-like算法。</p><p>但是，鲜有人关注DETR中二分图匹配部分对训练过程中收敛速度的影响。有<a href="https://www.sciencedirect.com/science/article/pii/S0370157321000843">文章</a>已经证明DETR中使用的匈牙利算法并不是稳定匹配，<span class="math inline">\(cost\)</span>矩阵的微小变化都可能会导致匹配结果发生巨大的变化，进一步导致decoder queries中优化目标发生变化。</p><h3 id="衡量标准">衡量标准</h3><p>在DN-DETR中，作者提出了一种衡量二部匹配结果稳定性的标准：</p><p>对于每张训练图片，将Transformer decoders预测得到的物体定义为<span class="math inline">\(O^{i}={O_{0}^{i},O_{1}^{i},\dots,O_{N-1}^{i}}\)</span>其中<span class="math inline">\(i\)</span>表示第<span class="math inline">\(i\)</span>个epoch，<span class="math inline">\(N\)</span>为预测出的物体的数量。将ground truth中的物体定义为<span class="math inline">\(T={T_0,T_1,\dots,T_{M-1}}\)</span> 其中<span class="math inline">\(M\)</span>为ground truth中物体的数量。 在二部匹配后，计算一个索引向量<span class="math inline">\(V^i={V_0^i,V_1^i,\dots,V_{N-1}^i}\)</span>来存储第<span class="math inline">\(i\)</span>的epoch的匹配结果。</p><p><span class="math display">\[V_n^i=\left\{\begin{aligned}    m, &amp; \ if\ O_n^i\ matches \ T_m \\    -1, &amp; \ if\ O_n^i\ matches\ nothing\end{aligned}\right.\]</span></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>论文阅读</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>论文阅读</tag>
+      
+      <tag>Object Detection</tag>
+      
+      <tag>DETR-like</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>[论文阅读]End-to-End Object Detection with Transformers</title>
+    <link href="/2022/07/07/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-End-to-End-Object-Detection-with-Transformers/"/>
+    <url>/2022/07/07/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-End-to-End-Object-Detection-with-Transformers/</url>
+    
+    <content type="html"><![CDATA[<h2 id="related-work">Related work</h2><p>一般的检测器往往依靠于一些初始猜想，例如two-stage中的proposals，one-stage中的anchors或者物体中心点。而<a href="https://openaccess.thecvf.com/content_CVPR_2020/html/Zhang_Bridging_the_Gap_Between_Anchor-Based_and_Anchor-Free_Detection_via_Adaptive_CVPR_2020_paper.html">Bridging the Gap Between Anchor-Based and Anchor-Free Detection via Adaptive Training Sample Selection</a>一文中提出这些检测器的最终性能严重依赖于初始赋值。因而DETR要删除这些hand-crafted过程，简化检测流程，直接预测物体坐标的集合。</p><h3 id="set-based-loss">Set-based loss</h3><h2 id="the-detr-model">The DETR model</h2><p><span class="math display">\[ \hat{\sigma}=\mathop{\arg \min}\limits_{\sigma\in \mathfrak{S}_N} \sum_{i}^{N}\mathcal{L}_{match}(y_i,\hat{y}_{\sigma(i)})\]</span></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>论文阅读</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>论文阅读</tag>
+      
+      <tag>Object Detection</tag>
+      
+      <tag>DETR-like</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="/2022/06/23/hello-world/"/>
+    <url>/2022/06/23/hello-world/</url>
+    
+    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="quick-start">Quick Start</h2><h3 id="create-a-new-post">Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo new <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="run-server">Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo server<br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="generate-static-files">Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo generate<br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="deploy-to-remote-sites">Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  
+</search>

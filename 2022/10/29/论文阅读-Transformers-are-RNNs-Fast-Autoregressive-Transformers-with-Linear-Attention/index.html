@@ -1,0 +1,730 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.png">
+  <link rel="icon" href="/img/icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="一瓶AD钙">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="之前的工作证明了多头自注意力只要有足够的注意力头数就可以表示任意的卷积层。但是，本文反向表明，用自回归目标训练的自注意力层可以被看作是一个RNN，可以显著加快自回归transformer模型的推理时间。 Transformer \(x\in\mathbb{R}^{N\times F}\),\(N\)个\(F\)维的特征向量。Transformer即一个函数\(T:\mathbb{R}^{N\tim">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[论文阅读] Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention">
+<meta property="og:url" content="http://k0145vin.com/2022/10/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Transformers-are-RNNs-Fast-Autoregressive-Transformers-with-Linear-Attention/index.html">
+<meta property="og:site_name" content="一瓶AD钙的博客">
+<meta property="og:description" content="之前的工作证明了多头自注意力只要有足够的注意力头数就可以表示任意的卷积层。但是，本文反向表明，用自回归目标训练的自注意力层可以被看作是一个RNN，可以显著加快自回归transformer模型的推理时间。 Transformer \(x\in\mathbb{R}^{N\times F}\),\(N\)个\(F\)维的特征向量。Transformer即一个函数\(T:\mathbb{R}^{N\tim">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-10-29T13:28:05.000Z">
+<meta property="article:modified_time" content="2022-10-29T13:36:28.034Z">
+<meta property="article:author" content="一瓶AD钙">
+<meta property="article:tag" content="论文阅读">
+<meta property="article:tag" content="transformer">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>[论文阅读] Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention - 一瓶AD钙的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"k0145vin.com","root":"/","version":"1.9.2","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>一瓶AD钙的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[论文阅读] Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        一瓶AD钙
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-29 21:28" pubdate>
+          2022年10月29日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          30 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">[论文阅读] Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>之前的工作证明了多头自注意力只要有足够的注意力头数就可以表示任意的卷积层。但是，本文反向表明，用自回归目标训练的自注意力层可以被看作是一个RNN，可以显著加快自回归transformer模型的推理时间。</p>
+<h5 id="transformer">Transformer</h5>
+<p><span class="math inline">\(x\in\mathbb{R}^{N\times F}\)</span>,<span class="math inline">\(N\)</span>个<span class="math inline">\(F\)</span>维的特征向量。Transformer即一个函数<span class="math inline">\(T:\mathbb{R}^{N\times F}\rightarrow\mathbb{R}^{N\times F}\)</span>，由<span class="math inline">\(L\)</span>个transformer层<span class="math inline">\(T_{1}(\cdot),\dots,T_{L}(\cdot)\)</span>组成: <span class="math display">\[
+T_{l}(x)=f_{l}(A_{l}(x)+x).
+\]</span> <span class="math inline">\(A_l(\cdot)\)</span>代表自注意力函数。输入序列<span class="math inline">\(x\)</span>由三个矩阵<span class="math inline">\(W_Q\in\mathbb{R}^{F\times D}，W_K\in\mathbb{R}^{F\times D},W_v\in\mathbb{R}^{F\times M}\)</span>映射到<span class="math inline">\(Q,K,V\)</span>，<span class="math inline">\(A_l(x)=V^\prime\)</span> <span class="math display">\[
+Q=xW_Q,\\
+K=xW_K,\\
+V=xW_V,\\
+A_l(x)=V^\prime={\rm softmax}(\frac{QK^T}{\sqrt{D}})V.
+\]</span> softmax函数按行应用于<span class="math inline">\(QK^T\)</span>,<span class="math inline">\(Q,K,V\)</span>分别表示queries、keys和values。</p>
+<p>式2表示了一种特定形式的注意力，称为softmax注意力，其中相似性是由<span class="math inline">\(Q\)</span>和<span class="math inline">\(K\)</span>的点积的指数表示的。给定一个下标<span class="math inline">\(i\)</span>，返回一个矩阵的第<span class="math inline">\(i\)</span>行作为一个向量，对于任意相似性函数，可以写出一个广义的注意力方程： <span class="math display">\[
+V_i^\prime=\frac{\sum_{j=1}^N{\rm sim}(Q_i,K_j)V_j}{\sum_{j=1}^N{\rm sim}(Q_i,K_j)}
+\]</span> 将式3中的相似性函数<span class="math inline">\({\rm sim}(q,k)\)</span>替代为<span class="math inline">\(\exp(\frac{q^Tk}{\sqrt{D}})\)</span>，则与式2等价。</p>
+<h5 id="linearized-attention">Linearized Attention</h5>
+<p>式2中注意力的定义具有一般性，可以用来定义一些其他的注意力，如多项式注意力和RBF核注意力。为了使式3定义一个注意力函数，需要对<span class="math inline">\(sim(\cdot)\)</span>施加一个非负的约束。<span class="math inline">\(k(x,y):\mathbb{R}^{2\times F}\rightarrow\mathbb{R}_{+}\)</span></p>
+<p>给定一个特征表示核函数<span class="math inline">\(\phi(x)\)</span>，则可以将式2重写为： <span class="math display">\[
+V_i^\prime=\frac{\sum_{j=1}^N\phi(Q_i)^T\phi(K_j)V_j}{\sum_{j=1}^N\phi(Q_i)^T\phi(K_j)}
+\]</span> 根据矩阵乘法的结合律，进一步简化： <span class="math display">\[
+V_i^\prime=\frac{\phi(Q_i)^T\sum_{j=1}^N\phi(K_j)V_j^T}{\phi(Q_i)^T\sum_{j=1}^N\phi(K_j)}
+\]</span> 当分子写成向量形式时，式5可以更简化 <span class="math display">\[
+(\phi(Q)\phi(K)^T)V=\phi(Q)(\phi(K)^TV)
+\]</span> 特征映射<span class="math inline">\(\phi(\cdot)\)</span>逐行应用于矩阵<span class="math inline">\(Q,K\)</span></p>
+<p>对于式2，softmax注意力的计算复杂度式<span class="math inline">\(\mathcal{O}(N^2)\)</span>的，<span class="math inline">\(N\)</span>表示序列长度。空间复杂度也是相同的，因为要保存完整的注意力矩阵来计算<span class="math inline">\(Q,K,V\)</span>的梯度。</p>
+<p>对于式5，linear transformer的时间复杂度、空间复杂度都是<span class="math inline">\(\mathcal{O}(N)\)</span>的，因为我们可以一次计算出<span class="math inline">\(\sum_{j=1}^N\phi(K_j)V_j^T\)</span>和<span class="math inline">\(\sum_{j=1}^N\phi(K_j)\)</span>并且在每个查询中重复使用。</p>
+<p>对于softmax注意力，乘法和加法的总复杂度为<span class="math inline">\(\mathcal{O}(N^2\max(D,M))\)</span>，<span class="math inline">\(D\)</span>是<span class="math inline">\(Q,K\)</span>的维度，<span class="math inline">\(M\)</span>是<span class="math inline">\(V\)</span>的维度。</p>
+<p>对于线性注意力，首先计算维度为<span class="math inline">\(C\)</span>的特征图，然后计算新值的加法和乘法的复杂度为<span class="math inline">\(\mathcal{O}(NCM)\)</span>。</p>
+<p>先前的分析中并没有考虑到核函数和特征函数的选择。与指数核对应的特征函数是无穷维的，这导致不能精确地线性化softmax注意力。而另一方面，多项式核具有精确的、有限维的特征映射，并且已被证明与指数核或RBF核同样有效。计算一个2次线性化多项式transformer的复杂度为<span class="math inline">\(\mathcal{O}(ND^2M)\)</span>。</p>
+<p>对于小序列，使用一个特征映射得到正的相似度 <span class="math display">\[
+\phi(x)={\rm elu}(x)+1
+\]</span> 相较于<span class="math inline">\({\rm relu}(\cdot)\)</span>，<span class="math inline">\({\rm elu}(\cdot)\)</span>可以避免x为负时将梯度设置为0。这样的特征映射产生的注意力计算复杂度为<span class="math inline">\(\mathcal{O}(NDM)\)</span>。</p>
+<h5 id="causal-masking">Causal Masking</h5>
+<p>利用transformer框架可以通过掩盖注意力高效地训练自回归模型，使得第<span class="math inline">\(i\)</span>个位置只能受到第<span class="math inline">\(j\)</span>个位置的影响，当且仅当<span class="math inline">\(j\leq i\)</span>，即一个位置不能受到后续位置的影响。由此将式3改写为： <span class="math display">\[
+V_i^\prime=\frac{\sum_{j=1}^i{\rm sim}(Q_i,K_j)V_j}{\sum_{j=1}^i{\rm sim}(Q_i,K_j)}.
+\]</span> 又由之前的推理，将掩蔽注意力线性化如下： <span class="math display">\[
+V_i^\prime=\frac{\phi(Q_i)^T\sum_{j=1}^i\phi(K_j)V_j^T}{\phi(Q_i)^T\sum_{j=1}^i\phi(K_j)}.
+\]</span> 引入<span class="math inline">\(S_i,Z_i\)</span>如下： <span class="math display">\[
+S_i=\sum_{j=1}^i\phi(K_j)V_j^T,
+\]</span></p>
+<p><span class="math display">\[
+Z_i=\sum_{j=1}^i\phi(K_j),
+\]</span></p>
+<p>将式9仅一步简化： <span class="math display">\[
+V_i^\prime=\frac{\phi(Q_i)^TS_i}{\phi(Q_I)^TZ_i}
+\]</span> <span class="math inline">\(S_i,Z_i\)</span>是可以由<span class="math inline">\(S_{i-1},Z_{i-1}\)</span>连续计算得到的，因而使得带有因果掩码的linear transformer的计算复杂度与序列长度称线性关系。</p>
+<p><strong>gradient computation</strong></p>
+<p>在任何深度学习框架中，式12的朴素实现都需要存储所有的中间值<span class="math inline">\(S_i\)</span>以计算梯度，这使得内存的消耗量最大增加<span class="math inline">\(\max(D,M)\)</span>倍，影响了对长序列或者深度模型的适用性。为解决这一问题，导出式9中的分子的梯度作为累加和。这使得我们可以在线性时间和固定的内存空间同时计算causal linear attention的前向和后向传播。</p>
+<p>给定分子<span class="math inline">\(\bar{V_i}\)</span>和标量损失函数对于分子<span class="math inline">\(\bar{V_i}\)</span>的梯度<span class="math inline">\(\nabla_{\bar{V_i}}\mathcal{L}\)</span>，导出<span class="math inline">\(\nabla_{\phi(Q_i)\mathcal{L}},\nabla_{\phi(K_i)}\mathcal{L},\nabla_{V_i}\mathcal{L}\)</span>如下： <span class="math display">\[
+\nabla_{\phi(Q_i)\mathcal{L}}=\nabla_{\bar{V_i}}\mathcal{L}{\Bigg(}\sum_{j=1}^i\phi(K_j)V_j^T{\Bigg)}^T,
+\]</span></p>
+<p><span class="math display">\[
+\nabla_{\phi(K_i)\mathcal{L}}={\Bigg(}\sum_{j=1}^N\phi(Q_j)\Big(\nabla_{\bar{V_i}}\mathcal{L}\Big)^T{\Bigg)}V_i,
+\]</span></p>
+<p><span class="math display">\[
+\nabla_{V_i}\mathcal{L}={\Bigg(}\sum_{j=1}^N\phi(Q_j)\Big(\nabla_{\bar{V_i}}\mathcal{L}\Big)^T{\Bigg)}^T\phi(K_i).
+\]</span></p>
+<p>式9、式13-15的累加和是在线性时间内、仅需关于序列长度线性比的内存空间内计算得到的。给定一个<span class="math inline">\(C\)</span>维的特征图，算法的时间复杂度为<span class="math inline">\(\mathcal{O}(NCM)\)</span>，空间复杂度为<span class="math inline">\(\mathcal{O}(N\max(C,M))\)</span></p>
+<h5 id="summary">Summary</h5>
+<p>这篇文章实现了线性复杂度的transformer，后续尝试把线性的transformer加到DETR类模型里跑一下，先从original DETR开始改。Facebook有后续的工作，<a target="_blank" rel="noopener" href="http://arxiv.org/abs/2209.07484">Hydra Attention</a>，但是还没有开源，先挖个坑后面再看。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/" class="category-chain-item">论文阅读</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">#论文阅读</a>
+      
+        <a href="/tags/transformer/">#transformer</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>[论文阅读] Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention</div>
+      <div>http://k0145vin.com/2022/10/29/论文阅读-Transformers-are-RNNs-Fast-Autoregressive-Transformers-with-Linear-Attention/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>一瓶AD钙</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年10月29日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/10/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Accelerating-DETR-Convergence-via-Semantic-Aligned-Matching/" title="[论文阅读]Accelerating DETR Convergence via Semantic-Aligned Matching">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">[论文阅读]Accelerating DETR Convergence via Semantic-Aligned Matching</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/10/28/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Attention-is-All-you-Need/" title="[论文阅读] Attention is All you Need">
+                        <span class="hidden-mobile">[论文阅读] Attention is All you Need</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      陕ICP备2022003183号-1
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.1/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
