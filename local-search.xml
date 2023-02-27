@@ -193,35 +193,6 @@
   
   
   <entry>
-    <title>[论文阅读]End-to-End Object Detection with Transformers</title>
-    <link href="/2022/07/07/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-End-to-End-Object-Detection-with-Transformers/"/>
-    <url>/2022/07/07/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-End-to-End-Object-Detection-with-Transformers/</url>
-    
-    <content type="html"><![CDATA[<h2 id="related-work">Related work</h2><p>一般的检测器往往依靠于一些初始猜想，例如two-stage中的proposals，one-stage中的anchors或者物体中心点。而<a href="https://openaccess.thecvf.com/content_CVPR_2020/html/Zhang_Bridging_the_Gap_Between_Anchor-Based_and_Anchor-Free_Detection_via_Adaptive_CVPR_2020_paper.html">Bridging the Gap Between Anchor-Based and Anchor-Free Detection via Adaptive Training Sample Selection</a>一文中提出这些检测器的最终性能严重依赖于初始赋值。因而DETR要删除这些hand-crafted过程，简化检测流程，直接预测物体坐标的集合。</p><h3 id="set-based-loss">Set-based loss</h3><h2 id="the-detr-model">The DETR model</h2><p><span class="math display">\[ \hat{\sigma}=\mathop{\arg \min}\limits_{\sigma\in \mathfrak{S}_N} \sum_{i}^{N}\mathcal{L}_{match}(y_i,\hat{y}_{\sigma(i)})\]</span></p>]]></content>
-    
-    
-    <categories>
-      
-      <category>论文阅读</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>论文阅读</tag>
-      
-      <tag>Object Detection</tag>
-      
-      <tag>DETR-like</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
     <title>Hello World</title>
     <link href="/2022/06/23/hello-world/"/>
     <url>/2022/06/23/hello-world/</url>
