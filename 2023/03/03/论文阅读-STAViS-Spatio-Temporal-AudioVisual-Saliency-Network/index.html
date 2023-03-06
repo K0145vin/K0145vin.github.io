@@ -16,17 +16,17 @@
   <meta name="author" content="一瓶AD钙">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Spatio-Temporal Audio Visual Saliency Network  本文提出的网络架构包含一个用于计算时空视觉显著性的模块、一个基于Sound-net的音频表征模块计算音频特征、一个声源定位模块来计算时空听觉显著性的模块，以及一个音视显著性模块来融合视觉和听觉显著性，并评估损失。 Spatio-Temporal Visual Network 视觉显著性部分，使用3D卷积用">
+    <meta name="description" content="Spatio-Temporal Audio Visual Saliency Network  本文提出的网络架构包含一个用于计算时空视觉显著性的模块、一个基于Sound-net的音频表征模块计算音频特征、一个声源定位模块来计算时空听觉显著性的模块，以及一个音视显著性模块来融合视觉和听觉显著性，并评估损失。 ### Spatio-Temporal Visual Network 视觉显著性部分，使用3">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[论文阅读]-STAViS: Spatio-Temporal AudioVisual Saliency Network">
 <meta property="og:url" content="http://k0145vin.xyz/2023/03/03/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-STAViS-Spatio-Temporal-AudioVisual-Saliency-Network/index.html">
 <meta property="og:site_name" content="一瓶AD钙的博客">
-<meta property="og:description" content="Spatio-Temporal Audio Visual Saliency Network  本文提出的网络架构包含一个用于计算时空视觉显著性的模块、一个基于Sound-net的音频表征模块计算音频特征、一个声源定位模块来计算时空听觉显著性的模块，以及一个音视显著性模块来融合视觉和听觉显著性，并评估损失。 Spatio-Temporal Visual Network 视觉显著性部分，使用3D卷积用">
+<meta property="og:description" content="Spatio-Temporal Audio Visual Saliency Network  本文提出的网络架构包含一个用于计算时空视觉显著性的模块、一个基于Sound-net的音频表征模块计算音频特征、一个声源定位模块来计算时空听觉显著性的模块，以及一个音视显著性模块来融合视觉和听觉显著性，并评估损失。 ### Spatio-Temporal Visual Network 视觉显著性部分，使用3">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303012155196.png">
 <meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303020741821.png">
 <meta property="article:published_time" content="2023-03-02T16:30:50.000Z">
-<meta property="article:modified_time" content="2023-03-02T16:36:15.120Z">
+<meta property="article:modified_time" content="2023-03-06T03:40:37.795Z">
 <meta property="article:author" content="一瓶AD钙">
 <meta property="article:tag" content="论文阅读">
 <meta property="article:tag" content="Saliency Prediction">
@@ -228,7 +228,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.1k 字
+          5.1k 字
         
       </span>
     
@@ -239,7 +239,7 @@
         
         
         
-          10 分钟
+          43 分钟
         
       </span>
     
@@ -283,15 +283,28 @@
               <div class="markdown-body">
                 
                 <h2 id="spatio-temporal-audio-visual-saliency-network">Spatio-Temporal Audio Visual Saliency Network</h2>
-<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303012155196.png" srcset="/img/loading.gif" lazyload /></p>
-<p>本文提出的网络架构包含一个用于计算时空视觉显著性的模块、一个基于Sound-net的音频表征模块计算音频特征、一个声源定位模块来计算时空听觉显著性的模块，以及一个音视显著性模块来融合视觉和听觉显著性，并评估损失。</p>
-<h3 id="spatio-temporal-visual-network">Spatio-Temporal Visual Network</h3>
-<p>视觉显著性部分，使用3D卷积用于行为分类，包含参数<span class="math inline">\(\mathbf{W}_{res}\)</span>，四个卷积块<span class="math inline">\(conv1,conv2,conv3,conv4\)</span>从不同的时空尺度上提供输出<span class="math inline">\(X^1,X^2,X^3,X^4\)</span>。同时，注意力机制DSAM(Deeply Supervised Attention Module)对特征图<span class="math inline">\(X^m\)</span>和注意力图<span class="math inline">\(M^m\)</span>的每个通道做乘积来增强特征表征中最突出的区域： <span class="math display">\[\tilde{X}^m=(1+M^m)\odot X^m,\quad m=1,\dots,4.\]</span></p>
-<p>深度监督是DSAM的核心思想，之前已经被应用于边缘检测、目标分割和静态显著性检测，但是与上述工作不同，这里DSAM的作用是双重的：既用于增强视觉特征，也用于提供多尺度的显著图，就如Fig2中深浅不一的绿色线标注的。因此，DSAM的参数<span class="math inline">\(\mathbf{W}_{am}^m\)</span>通过视觉网络的主路径和残差连接的眼球跟踪数据来训练。</p>
-<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303020741821.png" srcset="/img/loading.gif" lazyload /></p>
-<p>Fig3展示DSAM模块在第<span class="math inline">\(m\)</span>层的结构，包含了一个时间维度上的average pooling层，然后是两个空间卷积层，提供显著性特征<span class="math inline">\(S^m\)</span>和激活图(?)<span class="math inline">\(A^m\)</span>。两种表征都通过逆卷积层上采样至初始图像的大小，用于模块的深度监督和多尺度显著性建立。对激活图<span class="math inline">\(A^m(x,y)\)</span>进行空间softmax操作可以得到注意力图<span class="math inline">\(M^m(x,Y)\)</span>: <span class="math display">\[M^m(x,y)=\frac{\exp(A^m(x,y))}{\sum_x\sum_y\exp(A^m(x,y))}\]</span></p>
+<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303012155196.png" srcset="/img/loading.gif" lazyload /> 本文提出的网络架构包含一个用于计算时空视觉显著性的模块、一个基于Sound-net的音频表征模块计算音频特征、一个声源定位模块来计算时空听觉显著性的模块，以及一个音视显著性模块来融合视觉和听觉显著性，并评估损失。 ### Spatio-Temporal Visual Network 视觉显著性部分，使用3D卷积用于行为分类，包含参数<span class="math inline">\(\mathbf{W}_{res}\)</span>，四个卷积块<span class="math inline">\(conv1,conv2,conv3,conv4\)</span>从不同的时空尺度上提供输出<span class="math inline">\(X^1,X^2,X^3,X^4\)</span>。同时，注意力机制DSAM(Deeply Supervised Attention Module)对特征图<span class="math inline">\(X^m\)</span>和注意力图<span class="math inline">\(M^m\)</span>的每个通道做乘积来增强特征表征中最突出的区域： <span class="math display">\[\tilde{X}^m=(1+M^m)\odot X^m,\quad m=1,\dots,4.\]</span> 深度监督是DSAM的核心思想，之前已经被应用于边缘检测、目标分割和静态显著性检测，但是与上述工作不同，这里DSAM的作用是双重的：既用于增强视觉特征，也用于提供多尺度的显著图，就如Fig2中深浅不一的绿色线标注的。因此，DSAM的参数<span class="math inline">\(\mathbf{W}_{am}^m\)</span>通过视觉网络的主路径和残差连接的眼球跟踪数据来训练。 <img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303020741821.png" srcset="/img/loading.gif" lazyload /> Fig3展示DSAM模块在第<span class="math inline">\(m\)</span>层的结构，包含了一个时间维度上的average pooling层，然后是两个空间卷积层，提供显著性特征<span class="math inline">\(S^m\)</span>和激活图(?)<span class="math inline">\(A^m\)</span>。两种表征都通过逆卷积层上采样至初始图像的大小，用于模块的深度监督和多尺度显著性建立。对激活图<span class="math inline">\(A^m(x,y)\)</span>进行空间softmax操作可以得到注意力图<span class="math inline">\(M^m(x,Y)\)</span>: <span class="math display">\[M^m(x,y)=\frac{\exp(A^m(x,y))}{\sum_x\sum_y\exp(A^m(x,y))}\]</span></p>
 <h3 id="audio-representation-network">Audio Representation Network</h3>
-<p>对于音频数据，直接在声波上应用一维的卷积。首先将音频分割以匹配视频帧数（16帧）。应用的网络可以处理变长的音频，因此不同视频间不需要采用下采样策略来改变采样率。随后，应用一个汉宁窗来提高代表当前时间实例的中心音频值的权重，但也包括过去和未来的衰减值。之后，对于高层信息编码，采用基于SoundNet前七层的网络结构，其参数位<span class="math inline">\(\mathbf{W}_a\)</span>。这些层之后是一个时间维度的max-pooling层，以获得对于整个序列一个固定的维度向量<span class="math inline">\(f_a\in\mathbb{R}^{D_a}\)</span>。</p>
+<p>对于音频数据，直接在声波上应用一维的卷积。首先将音频分割以匹配视频帧数（16帧）。应用的网络可以处理变长的音频，因此不同视频间不需要采用下采样策略来改变采样率。随后，应用一个汉宁窗来提高代表当前时间实例的中心音频值的权重，但也包括过去和未来的衰减值。之后，对于高层信息编码，采用基于SoundNet前七层的网络结构，其参数位<span class="math inline">\(\mathbf{W}_a\)</span>。这些层之后是一个时间维度的max-pooling层，以获得对于整个序列一个固定的维度向量<span class="math inline">\(f_a\in\mathbb{R}^{D_a}\)</span>。 ### Sound Source Localization in Videos 选择3D卷积块<span class="math inline">\(conv3\)</span>的输出<span class="math inline">\(X^3\)</span>（特征维度为<span class="math inline">\(D_v\)</span>）作为视觉特征，因为这一层中加油丰富的视觉流语义信息和空间域上相当大的分辨率。应用时间平均池化来边缘化时间维度，获得整个序列的全局表示<span class="math inline">\(f_v\in\mathbb{R}^{D_v\times N_X \times N_Y}\)</span>。由于视觉和音频特征具有不同的特征维度，在隐藏层中使用两个不同的仿射变换进行重新投影： <span class="math display">\[\tilde{h}_a = \mathbf{U}_a\cdot f_a+\mathbf{b}_a,\quad h_v=\mathbf{U}_v\cdot f_v+\mathbf{b}_v\]</span></p>
+<p>其中<span class="math inline">\(\tilde{h}_a\in\mathbb{R}^{D_h},h_v\in\mathbb{R}^{D_v\times N_X \times N_Y}\)</span>，<span class="math inline">\(\mathbf{U}_a,\mathbf{b}_a,\mathbf{U}_v,\mathbf{b}_v\)</span>是对应的学习参数。此外，对音频特征应用空间平铺来匹配视觉特征的空间维度，得到<span class="math inline">\(h_a\in\mathbb{R}^{D_v\times N_X \times N_Y}\)</span>。</p>
+<p>为了学习音频特征<span class="math inline">\(h_a\)</span>和视觉特征<span class="math inline">\(h_v\)</span>之间的对应关系，文章研究了三种方法。第一种方法不需要学习参数，直接计算两个向量之间的余弦相似度，从而得到一个定位图<span class="math inline">\(L_1\in\mathbb{R}^{N_X\times N_Y}\)</span>。第二种方法，对向量<span class="math inline">\(h_a,h_v\)</span>在像素点<span class="math inline">\((x,y)\)</span>处的内积进行加权，从而获得一个或多个定位图<span class="math inline">\(L_2^j\in\mathbb{R}^{N_X\times N_Y}, \quad j=1,\dots,N_{out}\)</span>： <span class="math display">\[L_2^j(x,y)\sum_{k=1}^{D_h}s^{j,k}\cdot h^k_v(x,y)\cdot h^k_a(x,y)+\beta^j\]</span> 其中<span class="math inline">\(s^{j,k},\beta^j\)</span>是学习参数。第三种方法，也是最后使用的方法，即对输入的多模态数据应用双线性插值，也可以得到一个或多个定位图<span class="math inline">\(L_3^j\in\mathbb{R}^{N_X\times N_Y}, \quad j=1,\dots,N_{out}\)</span>： <span class="math display">\[
+\begin{aligned}
+L_3^j(x,y)=h_v(x,y)^T\cdot\mathbf{M}^j\cdot h_a(x,y)+\mu^j \\
+= \sum_{l=1}^{D_h}\sum_{k=1}^{D_h}M^{j,l,k}\cdot h_v^l(x,y)\cdot h_a^k(x,y)+\mu^j
+\end{aligned}
+\]</span> 其中<span class="math inline">\(M^{j,l,k},\mu^j\)</span>是学习参数。先前提到的两种方法<span class="math inline">\((L_1,L_2)\)</span>是双线性插值方法<span class="math inline">\(L_3\)</span>的特殊情况，使得输入之间有更丰富的相互作用。当矩阵<span class="math inline">\(\mathbf{M}^j\)</span>是对角矩阵，<span class="math inline">\(s^{j,k}\)</span>是对角元时，就是加权内积<span class="math inline">\((L_2)\)</span>的情况。当矩阵<span class="math inline">\(\mathbf{M}\)</span>是单位矩阵时，结果非常接近余弦相似度的版本（经过归一化因子）。 ### Audiovisual Saliency Estimation 通过声源定位图计算得到了音频显著图。但是，在一段视频中有很多方面可以吸引人的注意力，但是与音频并不相关。因此，为了构建一个多模态显著性预测网络，还需要包括由时空视觉网络建模的纯视觉信息。这也是这篇文章的一个重要贡献：提出了不同的音视融合方法。 最简单的融合方案就是学习视觉映射<span class="math inline">\(S_v\)</span>和音频相关映射<span class="math inline">\(S^a\)</span>（通过对多级级联的视觉显著性特征<span class="math inline">\(V^j=(S^1|\dots|S^m|\dots|S^M\)</span>和定位图<span class="math inline">\(L^j\)</span>分别应用全卷积层得到）的一个线性加权和：<span class="math inline">\(S_1^{av}=w_v\cdot\sigma(S^w)+w_a\cdot\sigma(S^a)\)</span>，其中<span class="math inline">\(\sigma(\cdot)\)</span>是sigmoid激活函数。 此外，受之前基于信号处理的视听显著性方法的启发，研究了一种基于注意力的方案，由音频流调制视频流：<span class="math inline">\(S_2^{av}=\sigma(S^v)\odot(1+\sigma(S^a))\)</span>。在有多个定位图的情况下，可以将级联的视觉显著性特征<span class="math inline">\(V^j\)</span>和定位图<span class="math inline">\(L^j\)</span>逐一相乘，然后应用全卷积层来获取单个显著图：<span class="math inline">\(\tilde{S}_2^{av,j}=\sigma(V^j)\odot(1+\sigma(L_j))\)</span>。 然而，如Fig2所示，文中最主要最通用的、使得视觉和音频特征映射之间有更多自由交互的方法是将多模态特征连接，然后由卷积层进行融合，得到一个显著图：<span class="math inline">\(S_3^{av}=\mathbf{W}_{cat}*(V|L)+\beta_{av}\)</span>。 最后，融合方案是之前所有方法的加权学习和：<span class="math inline">\(S^{av}_{fus}=\tilde{w}_v\cdot\sigma(S^v)+\tilde{w}_a\cdot\sigma(S^a)+w_{av}\cdot\sigma(S^3)\)</span>。 ### Saliency Losses 为了训练与视频流相关的参数<span class="math inline">\(\mathbf{W}_v\)</span>，构建了一个损失，将显著图<span class="math inline">\(S^v\)</span>和激活<span class="math inline">\(A_m\)</span>与由眼动数据得到的ground truth <span class="math inline">\(Y_{sal}\)</span>相比较： <span class="math display">\[
+\begin{aligned}
+\mathcal{L}_v(\mathbf{W}_v)=\mathcal{D}(\mathbf{W}_v|\sigma(S^v),Y_{sal}) + \\
+\sum_{m=1}^4\mathcal{D}(\mathbf{W}_{AM}^m|\sigma(A^m),Y_{sal}),
+\end{aligned}
+\]</span> 其中，<span class="math inline">\(\sigma(\cdot)\)</span>是sigmoid非线性函数，<span class="math inline">\(\mathcal{D}(\cdot)\)</span>是预测与真实图像之间的损失函数。当训练音视网络的参数<span class="math inline">\(\mathbf{W}_{av}\)</span>时，使用训练过的纯视觉网络作为起点，不使用DSAM模块的跳过连接： <span class="math display">\[\mathcal{L}_{av}(\mathbf{W}_{av})=\mathcal{D}(\mathbf{W}_{av}|\sigma(S^{av}),Y_{sal}).\]</span> 为了比较预测的显著图<span class="math inline">\(P\in[0,1]^{N_X\times N_Y}\)</span>和眼动数据应用了不同的评估指标。对于真实图像，既可以使用大小为<span class="math inline">\({N_X\times N_Y}\)</span>的图像平面上的固定位置<span class="math inline">\(Y_{fix}\in{0,1}^{N_X\times N_Y}\)</span>，也可以使用由二元固定图和高斯核卷积得到的稀疏显著图<span class="math inline">\(Y_{den}\in[0,1]^{N_X\times N_Y}\)</span>。所以，对于<span class="math inline">\(\mathcal{D}(\cdot)\)</span>，使用了评估显著性预测不同方面相关联的三种损失函数。第一种是预测图<span class="math inline">\(P\)</span>和稀疏图<span class="math inline">\(Y_{den}\)</span>之间的交叉熵损失： <span class="math display">\[
+\begin{aligned}
+\mathcal{D}_{CE}(\mathbf{W}|P,Y_{den})=-\sum_{x,y}Y_{den}(x,y)\odot\log(P(x,y;\mathbf{W})) \\
++(1-Y_{den}(x,y))\odot(1-\log(P(x,y;\mathbf{W}))).
+\end{aligned}
+\]</span> 第二种损失函数基于线性相关系数，广泛应用于显著性预测评估，用来衡量预测图<span class="math inline">\(P\)</span>和稀疏图<span class="math inline">\(Y_{den}\)</span>之间的线性关系： <span class="math display">\[
+\mathcal{D}_{CC}(\mathbf{W}|P,Y_{den})=-\frac{\operatorname{cov}(P(x,y;\mathbf{W}),Y_{den}(x,y))}{\rho(P(x,y;\mathbf{W})\cdot\rho(Y_{den}(x,y))}
+\]</span> 其中<span class="math inline">\(\operatorname{cov},\rho\)</span>分别代表协方差和标准差。最后一种损失函数是由Normalized Scanpath Saliency（NSS）得来的，计算预测图<span class="math inline">\(\tilde{P}(x,y;\mathbf{W})=\frac{P(x,y;\mathbf{W})-\mu(P(x,y;\mathbf{W}))}{\rho(P(x,y;\mathbf{W}))}\)</span>，经过零均值归一化和单位标准化后，在人注视的位置(<span class="math inline">\(Y_{fix}(x,y)=1\)</span>)： <span class="math display">\[\mathcal{D}_{NSS}(\mathbf{W}|\tilde{P},Y_{fix})=-\frac{1}{N_f}\sum_{x,y}\tilde{P}(x,y;\mathbf{W})\odot Y_{fix}(x,y).\]</span> 其中<span class="math inline">\(N_f=\sum_{x,y}Y_{fix}(x,y)\)</span>是所有注视点的总数。对于第i个输入样例的最终损失函数为分别使用对应损失<span class="math inline">\(\mathcal{D}^i_{CE},\mathcal{D}^i_{CC},\mathcal{D}^i_{NSS}\)</span>的损失函数<span class="math inline">\(\mathcal{L}^i_{CE},\mathcal{L}^i_{CC},\mathcal{L}^i_{NSS}\)</span>的加权和： <span class="math display">\[\mathcal{L}^i_{sal}(\mathbf{W})=w_1\mathcal{L}^i_{CE}+w_2\mathcal{L}^i_{CC}+w_3\mathcal{L}^i_{NSS}\]</span> 其中<span class="math inline">\(w_1,w_2,w_3\)</span>是每种损失的权重。</p>
 
                 
               </div>
