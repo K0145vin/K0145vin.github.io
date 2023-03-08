@@ -105,6 +105,8 @@
       
       <tag>DETR-like</tag>
       
+      <tag>transformer</tag>
+      
     </tags>
     
   </entry>
@@ -212,6 +214,8 @@
       <tag>Object Detection</tag>
       
       <tag>DETR-like</tag>
+      
+      <tag>transformer</tag>
       
     </tags>
     
