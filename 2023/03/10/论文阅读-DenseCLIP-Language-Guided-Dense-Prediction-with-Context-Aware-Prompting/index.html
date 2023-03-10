@@ -16,17 +16,17 @@
   <meta name="author" content="一瓶AD钙">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Approach Context-Aware Prompting  #### Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： \[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\] 其中，\(\mathbf{p}\in">
+    <meta name="description" content="Approach Context-Aware Prompting  Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： \[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\] 其中，\(\mathbf{p}\in\math">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting">
 <meta property="og:url" content="http://k0145vin.xyz/2023/03/10/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-DenseCLIP-Language-Guided-Dense-Prediction-with-Context-Aware-Prompting/index.html">
 <meta property="og:site_name" content="一瓶AD钙的博客">
-<meta property="og:description" content="Approach Context-Aware Prompting  #### Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： \[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\] 其中，\(\mathbf{p}\in">
+<meta property="og:description" content="Approach Context-Aware Prompting  Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： \[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\] 其中，\(\mathbf{p}\in\math">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303092131810.png">
 <meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303091541826.png">
 <meta property="article:published_time" content="2023-03-10T07:35:57.000Z">
-<meta property="article:modified_time" content="2023-03-10T07:36:46.540Z">
+<meta property="article:modified_time" content="2023-03-10T07:38:38.105Z">
 <meta property="article:author" content="一瓶AD钙">
 <meta property="article:tag" content="论文阅读">
 <meta property="article:tag" content="CLIP">
@@ -284,7 +284,9 @@
                 
                 <h2 id="approach">Approach</h2>
 <h3 id="context-aware-prompting">Context-Aware Prompting</h3>
-<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303092131810.png" srcset="/img/loading.gif" lazyload /> #### Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： <span class="math display">\[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\]</span></p>
+<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303092131810.png" srcset="/img/loading.gif" lazyload /></p>
+<h4 id="language-domain-prompting">Language-domain prompting</h4>
+<p>不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： <span class="math display">\[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\]</span></p>
 <p>其中，<span class="math inline">\(\mathbf{p}\in\mathbb{R}^{N\times C}\)</span>为可学习的文本上下文，<span class="math inline">\(\mathbf{e}_k\in\mathbb{R}^C\)</span>为第k类名称的嵌入。</p>
 <h4 id="vision-to-language-prompting">Vision-to-language prompting</h4>
 <p>包含视觉内容的描述可以是文本更加精确。因此，使用transformer decoder中的交叉注意力机制来建模视觉和语言之间的交互。 <img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303091541826.png" srcset="/img/loading.gif" lazyload /></p>
