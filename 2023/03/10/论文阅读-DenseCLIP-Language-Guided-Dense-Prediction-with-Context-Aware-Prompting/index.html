@@ -16,28 +16,26 @@
   <meta name="author" content="一瓶AD钙">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Overall Architecture  Fig2展示了Video Swin Transformer的tiny版本。输入视频的大小为\(T\times H\times W \times 3\)，共\(T\)帧，每帧包含\(H\times W \times 3\)个像素。在Video Swin Transformer中将大小为\(2\times4\times4\times3\)的3D patch作">
+    <meta name="description" content="Approach Context-Aware Prompting  #### Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： \[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\] 其中，\(\mathbf{p}\in">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[论文阅读]Video Swin Transformer">
-<meta property="og:url" content="http://k0145vin.xyz/2023/03/08/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Video-Swin-Transformer/index.html">
+<meta property="og:title" content="[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting">
+<meta property="og:url" content="http://k0145vin.xyz/2023/03/10/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-DenseCLIP-Language-Guided-Dense-Prediction-with-Context-Aware-Prompting/index.html">
 <meta property="og:site_name" content="一瓶AD钙的博客">
-<meta property="og:description" content="Overall Architecture  Fig2展示了Video Swin Transformer的tiny版本。输入视频的大小为\(T\times H\times W \times 3\)，共\(T\)帧，每帧包含\(H\times W \times 3\)个像素。在Video Swin Transformer中将大小为\(2\times4\times4\times3\)的3D patch作">
+<meta property="og:description" content="Approach Context-Aware Prompting  #### Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： \[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\] 其中，\(\mathbf{p}\in">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303081528967.png">
-<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303081554766.png">
-<meta property="article:published_time" content="2023-03-08T12:02:15.000Z">
-<meta property="article:modified_time" content="2023-03-08T12:05:10.818Z">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303092131810.png">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303091541826.png">
+<meta property="article:published_time" content="2023-03-10T07:35:57.000Z">
+<meta property="article:modified_time" content="2023-03-10T07:36:46.540Z">
 <meta property="article:author" content="一瓶AD钙">
 <meta property="article:tag" content="论文阅读">
-<meta property="article:tag" content="Object Detection">
-<meta property="article:tag" content="DETR-like">
-<meta property="article:tag" content="transformer">
+<meta property="article:tag" content="CLIP">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303081528967.png">
+<meta name="twitter:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303092131810.png">
   
   
   
-  <title>[论文阅读]Video Swin Transformer - 一瓶AD钙的博客</title>
+  <title>[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting - 一瓶AD钙的博客</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -202,7 +200,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="[论文阅读]Video Swin Transformer"></span>
+            <span id="subtitle" data-typed-text="[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting"></span>
           
         </div>
 
@@ -218,8 +216,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-03-08 20:02" pubdate>
-          2023年3月8日 晚上
+        <time datetime="2023-03-10 15:35" pubdate>
+          2023年3月10日 下午
         </time>
       </span>
     
@@ -230,7 +228,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.8k 字
+          2k 字
         
       </span>
     
@@ -241,7 +239,7 @@
         
         
         
-          16 分钟
+          17 分钟
         
       </span>
     
@@ -279,31 +277,24 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">[论文阅读]Video Swin Transformer</h1>
+            <h1 style="display: none">[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting</h1>
             
             
               <div class="markdown-body">
                 
-                <h2 id="overall-architecture">Overall Architecture</h2>
-<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303081528967.png" srcset="/img/loading.gif" lazyload /> Fig2展示了Video Swin Transformer的tiny版本。输入视频的大小为<span class="math inline">\(T\times H\times W \times 3\)</span>，共<span class="math inline">\(T\)</span>帧，每帧包含<span class="math inline">\(H\times W \times 3\)</span>个像素。在Video Swin Transformer中将大小为<span class="math inline">\(2\times4\times4\times3\)</span>的3D patch作为一个token，所以分隔层共包含<span class="math inline">\(\frac{T}{2}\times\frac{H}{4}\times\frac{W}{4}\)</span>个3D token，每个token中包含一个96维的特征。然后经过一个线性层将特征投影到任意维度<span class="math inline">\(C\)</span>。Patch合并层会合并相邻<span class="math inline">\(2\times2\)</span>的patch，并经过线性层连接起来，维度减至原来的一半。</p>
-<h2 id="d-shifted-window-based-msa-module">3D Shifted Window based MSA Module</h2>
-<h3 id="multi-head-self--attention-on-non-overlapping-3d-windows">Multi-head self- attention on non-overlapping 3D windows</h3>
-<p>给定一个包含<span class="math inline">\(T^\prime\times H^\prime\times W^\prime\)</span>个3D token的视频，3D窗口大小为<span class="math inline">\(P\times M\times M\)</span>，则被分割为<span class="math inline">\(\lceil\frac{T^\prime}{P}\rceil\times\lceil\frac{H^\prime}{M}\rceil\times\lceil\frac{W^\prime}{M}\rceil\)</span>个互不重叠的3D窗口。</p>
-<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303081554766.png" srcset="/img/loading.gif" lazyload /></p>
-<h3 id="d-shifted-windows">3D Shifted Windows</h3>
-<p>由于多头注意力机制应用在每个不重叠的3D窗口内，不同窗口之间缺乏联系，这可能会限制架构的表示能力。因此，将Swin Transformer中滑动的2D窗口扩展到3D，引入跨窗口联系，同时保持给予自注意力的非重叠窗口的计算效率。</p>
-<p>给定输入的3D token的数量为<span class="math inline">\(T^\prime\times H^\prime\times W^\prime\)</span>，每个3D窗口的大小为<span class="math inline">\(P\times M \times M\)</span>，对于连续的两层，第一层中的自注意力模块采用常规的窗口分割策略，得到<span class="math inline">\(\lceil\frac{T^\prime}{P}\rceil\times\lceil\frac{H^\prime}{M}\rceil\times\lceil\frac{W^\prime}{M}\rceil\)</span>个不重叠的3D窗口。对于第二层中的自注意力模块 ，窗口分割根据前一层的自注意力模块沿时间、高度和宽度坐标移动<span class="math inline">\((\frac{T}{2}\times\frac{H}{4}\times\frac{W}{4})\)</span>个token。</p>
-<p>Fig3解释了这一过程。虽然窗口的数量增加了，但是根据Swin Transformer的设置，最终的计算窗口数量仍然是8.</p>
-<p>采用滑动窗口的分割方法，计算两个连续的Video Swin Transformer块： <span class="math display">\[
-\begin{array}{l}
-\hat{\mathbf{z}}^l=\operatorname{3DW-MSA}(\operatorname{LN}(\mathbf{z}^{l-1}))+\mathbf{z}^{l-1},\\
-\mathbf{z}^l=\operatorname{FFN}(\operatorname{LN}(\hat{\mathbf{z}}^l))+\mathbf{z}^l,\\
-\hat{\mathbf{z}}^{l+1}=\operatorname{3DSW-MSA}(\operatorname{LN}(\mathbf{z}^{l}))+\mathbf{z}^{l},\\
-\mathbf{z}^{l+1}=\operatorname{FFN}(\operatorname{LN}(\hat{\mathbf{z}}^{l+1}))+\mathbf{z}^{l+1}. 
-\end{array}
-\]</span> 其中<span class="math inline">\(\hat{\mathbf{z}}^l,\mathbf{z}^l\)</span>分别代表3D(S)W-MSA模块和FFN模块的输出特征。</p>
-<h3 id="d-relative-position-bias">3D Relative Position Bias</h3>
-<p>在自注意力头引入3D相对位置偏差<span class="math inline">\(B\in\mathbb{R}^{P^2\times M^2\times M^2}\)</span>： <span class="math display">\[\operatorname{Attention}(Q,K,V)=\operatorname{SoftMax}(QK^T/\sqrt{d}+B)V\]</span></p>
+                <h2 id="approach">Approach</h2>
+<h3 id="context-aware-prompting">Context-Aware Prompting</h3>
+<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303092131810.png" srcset="/img/loading.gif" lazyload /> #### Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： <span class="math display">\[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\]</span></p>
+<p>其中，<span class="math inline">\(\mathbf{p}\in\mathbb{R}^{N\times C}\)</span>为可学习的文本上下文，<span class="math inline">\(\mathbf{e}_k\in\mathbb{R}^C\)</span>为第k类名称的嵌入。</p>
+<h4 id="vision-to-language-prompting">Vision-to-language prompting</h4>
+<p>包含视觉内容的描述可以是文本更加精确。因此，使用transformer decoder中的交叉注意力机制来建模视觉和语言之间的交互。 <img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303091541826.png" srcset="/img/loading.gif" lazyload /></p>
+<p>有两种不同的上下文感知提示策略，正如Fig4中展示的。第一种策略称为<em>pre-model prompting</em>，把特征<span class="math inline">\([\bar{\mathbf{z}},\mathbf{z}]\)</span>传入transformer decoder中编码视觉上下文： <span class="math display">\[\mathbf{v}_{\operatorname{pre}}=\operatorname{TransDecoder}(\mathbf{q},[\bar{\mathbf{z}},\mathbf{z}])\]</span> 其中，<span class="math inline">\(\mathbf{q}\in\mathbb{R}^{N\times C}\)</span>是一个可学习query的集合，<span class="math inline">\(\mathbf{v}_{\operatorname{pre}}\in\mathbb{R}^{N\times C}\)</span>是提取出来的视觉上下文。用<span class="math inline">\(\mathbf{v}_{\operatorname{pre}}\)</span>替代上式中的<span class="math inline">\(\mathbf{p}\)</span>作为文本编码器的输入。</p>
+<p>另外一种选择是在文本编码器之后细化文本特征，称为<em>post-model prompting</em>。使用CoOp生成文本特征，并直接作为transformer decoder的查询： <span class="math display">\[\mathbf{v}_{\operatorname{post}}=\operatorname{TransDecoder}(\mathbf{t},[\bar{\mathbf{z}},\mathbf{z}])\]</span> 这种方式使得文本可以寻找最相关的视觉线索，然后通过残差连接更新文本特征： <span class="math display">\[\mathbf{t}\leftarrow\mathbf{t}+\gamma\mathbf{v}_{\operatorname{post}}\]</span> 其中，<span class="math inline">\(\gamma\in\mathbb{R}^C\)</span>是个可学习参数，来控制残差连接的比例。</p>
+<p>尽管两种版本的目标相同，但是文章作者更倾向于后提示，主要原因有两个：（1）后提示更高效。由于预提示的输入依赖于图像，因此在推理过程中需要文本编码器额外的前向通道。在后提示的情况下，可以在训练后保存提取的文本特征，从而减少推理过程中文本编码器带来的开销。（2）实验结果也表明，后提示的性能更好。</p>
+<h3 id="instantiations">Instantiations</h3>
+<h4 id="semantic-segmentation">Semantic segmentation</h4>
+<p>整个架构是模型无关的，可以应用于任何稠密预测任务。提出使用一个辅助目标来更好地利用像素-文本得分图进行分割。由于得分图<span class="math inline">\(\mathbf{s}\in\mathbb{R}^{H_4W_4\times K}\)</span>可以看作一个小的分割结果，因此可以在上面计算一个分割损失： <span class="math display">\[\mathcal{L}^{\operatorname{seg}}_{\operatorname{aux}}=\operatorname{CrossEntropy}(\operatorname{Softmax}(\mathbf{s}/\tau),\mathbf{y})\]</span> 其中，<span class="math inline">\(\tau=0.07,\mathbf{y}\in\{1,\dots,K\}^{H_4W_4}\)</span>是真实值标签。辅助分割损失函数可以帮助特征图更快恢复其局部性，有利于稠密预测任务进行分割和检测。 #### Object detection &amp; instance segmentation</p>
+<p>在这种情况下，没有真实值分割标签。为了构建类似于分割中的辅助损失，使用边界框和标签构建一个二进制目标<span class="math inline">\(\tilde{\mathbf{y}}\in\{0,1\}^{H_4W_4\times K}\)</span>。辅助目标可以定义为二元交叉熵损失： <span class="math display">\[\mathcal{L}^{\operatorname{det}}_{\operatorname{aux}}=\operatorname{BinaryCrossEntropy}(\operatorname{Sigmoid}(\mathbf{s}/\tau),\tilde{\mathbf{y}})\]</span></p>
 
                 
               </div>
@@ -339,11 +330,7 @@
       
         <a href="/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">#论文阅读</a>
       
-        <a href="/tags/Object-Detection/">#Object Detection</a>
-      
-        <a href="/tags/DETR-like/">#DETR-like</a>
-      
-        <a href="/tags/transformer/">#transformer</a>
+        <a href="/tags/CLIP/">#CLIP</a>
       
     </div>
   
@@ -355,8 +342,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>[论文阅读]Video Swin Transformer</div>
-      <div>http://k0145vin.xyz/2023/03/08/论文阅读-Video-Swin-Transformer/</div>
+      <div>[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting</div>
+      <div>http://k0145vin.xyz/2023/03/10/论文阅读-DenseCLIP-Language-Guided-Dense-Prediction-with-Context-Aware-Prompting/</div>
     </div>
     <div class="license-meta">
       
@@ -368,7 +355,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年3月8日</div>
+          <div>2023年3月10日</div>
         </div>
       
       
@@ -398,18 +385,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/03/10/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-DenseCLIP-Language-Guided-Dense-Prediction-with-Context-Aware-Prompting/" title="[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/03/03/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-STAViS-Spatio-Temporal-AudioVisual-Saliency-Network/" title="[论文阅读]STAViS: Spatio-Temporal AudioVisual Saliency Network">
-                        <span class="hidden-mobile">[论文阅读]STAViS: Spatio-Temporal AudioVisual Saliency Network</span>
+                      <a href="/2023/03/08/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Video-Swin-Transformer/" title="[论文阅读]Video Swin Transformer">
+                        <span class="hidden-mobile">[论文阅读]Video Swin Transformer</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
