@@ -16,26 +16,28 @@
   <meta name="author" content="一瓶AD钙">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Approach Context-Aware Prompting  Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： \[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\] 其中，\(\mathbf{p}\in\math">
+    <meta name="description" content="AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION Introduction  在视频理解领域，目前主流的两种做法： 1. 在Image Model上加Temporal Module 2. 将Image Model扩展成Video Model 这些做法存在明显的缺点： 1. 需要full fine-tuning，耗费计">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting">
-<meta property="og:url" content="http://k0145vin.xyz/2023/03/10/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-DenseCLIP-Language-Guided-Dense-Prediction-with-Context-Aware-Prompting/index.html">
+<meta property="og:title" content="[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION">
+<meta property="og:url" content="http://k0145vin.xyz/2023/03/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-AIM-ADAPTING-IMAGE-MODELS-FOR-EFFICIENT-VIDEO-ACTION-RECOGNITION/index.html">
 <meta property="og:site_name" content="一瓶AD钙的博客">
-<meta property="og:description" content="Approach Context-Aware Prompting  Language-domain prompting 不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： \[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\] 其中，\(\mathbf{p}\in\math">
+<meta property="og:description" content="AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION Introduction  在视频理解领域，目前主流的两种做法： 1. 在Image Model上加Temporal Module 2. 将Image Model扩展成Video Model 这些做法存在明显的缺点： 1. 需要full fine-tuning，耗费计">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303092131810.png">
-<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303091541826.png">
-<meta property="article:published_time" content="2023-03-10T07:35:57.000Z">
-<meta property="article:modified_time" content="2023-03-10T07:38:38.105Z">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272201795.png">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272216512.png">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282011349.png">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282055287.png">
+<meta property="article:published_time" content="2023-03-29T06:51:40.000Z">
+<meta property="article:modified_time" content="2023-03-29T06:53:18.833Z">
 <meta property="article:author" content="一瓶AD钙">
 <meta property="article:tag" content="论文阅读">
-<meta property="article:tag" content="CLIP">
+<meta property="article:tag" content="PEFT">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303092131810.png">
+<meta name="twitter:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272201795.png">
   
   
   
-  <title>[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting - 一瓶AD钙的博客</title>
+  <title>[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION - 一瓶AD钙的博客</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -200,7 +202,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting"></span>
+            <span id="subtitle" data-typed-text="[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION"></span>
           
         </div>
 
@@ -216,8 +218,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-03-10 15:35" pubdate>
-          2023年3月10日 下午
+        <time datetime="2023-03-29 14:51" pubdate>
+          2023年3月29日 下午
         </time>
       </span>
     
@@ -228,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2k 字
+          2.3k 字
         
       </span>
     
@@ -239,7 +241,7 @@
         
         
         
-          17 分钟
+          20 分钟
         
       </span>
     
@@ -277,26 +279,37 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting</h1>
+            <h1 style="display: none">[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION</h1>
             
             
               <div class="markdown-body">
                 
-                <h2 id="approach">Approach</h2>
-<h3 id="context-aware-prompting">Context-Aware Prompting</h3>
-<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303092131810.png" srcset="/img/loading.gif" lazyload /></p>
-<h4 id="language-domain-prompting">Language-domain prompting</h4>
-<p>不再使用人工设计的模板作为文本提示，受CoOp的启发，使用可学习的文本上下文作为基线，只包含语言域的提示，则文本编码器的输入变为： <span class="math display">\[[\mathbf{p},\mathbf{e}_k],\quad 1\leq k\leq K,\]</span></p>
-<p>其中，<span class="math inline">\(\mathbf{p}\in\mathbb{R}^{N\times C}\)</span>为可学习的文本上下文，<span class="math inline">\(\mathbf{e}_k\in\mathbb{R}^C\)</span>为第k类名称的嵌入。</p>
-<h4 id="vision-to-language-prompting">Vision-to-language prompting</h4>
-<p>包含视觉内容的描述可以是文本更加精确。因此，使用transformer decoder中的交叉注意力机制来建模视觉和语言之间的交互。 <img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303091541826.png" srcset="/img/loading.gif" lazyload /></p>
-<p>有两种不同的上下文感知提示策略，正如Fig4中展示的。第一种策略称为<em>pre-model prompting</em>，把特征<span class="math inline">\([\bar{\mathbf{z}},\mathbf{z}]\)</span>传入transformer decoder中编码视觉上下文： <span class="math display">\[\mathbf{v}_{\operatorname{pre}}=\operatorname{TransDecoder}(\mathbf{q},[\bar{\mathbf{z}},\mathbf{z}])\]</span> 其中，<span class="math inline">\(\mathbf{q}\in\mathbb{R}^{N\times C}\)</span>是一个可学习query的集合，<span class="math inline">\(\mathbf{v}_{\operatorname{pre}}\in\mathbb{R}^{N\times C}\)</span>是提取出来的视觉上下文。用<span class="math inline">\(\mathbf{v}_{\operatorname{pre}}\)</span>替代上式中的<span class="math inline">\(\mathbf{p}\)</span>作为文本编码器的输入。</p>
-<p>另外一种选择是在文本编码器之后细化文本特征，称为<em>post-model prompting</em>。使用CoOp生成文本特征，并直接作为transformer decoder的查询： <span class="math display">\[\mathbf{v}_{\operatorname{post}}=\operatorname{TransDecoder}(\mathbf{t},[\bar{\mathbf{z}},\mathbf{z}])\]</span> 这种方式使得文本可以寻找最相关的视觉线索，然后通过残差连接更新文本特征： <span class="math display">\[\mathbf{t}\leftarrow\mathbf{t}+\gamma\mathbf{v}_{\operatorname{post}}\]</span> 其中，<span class="math inline">\(\gamma\in\mathbb{R}^C\)</span>是个可学习参数，来控制残差连接的比例。</p>
-<p>尽管两种版本的目标相同，但是文章作者更倾向于后提示，主要原因有两个：（1）后提示更高效。由于预提示的输入依赖于图像，因此在推理过程中需要文本编码器额外的前向通道。在后提示的情况下，可以在训练后保存提取的文本特征，从而减少推理过程中文本编码器带来的开销。（2）实验结果也表明，后提示的性能更好。</p>
-<h3 id="instantiations">Instantiations</h3>
-<h4 id="semantic-segmentation">Semantic segmentation</h4>
-<p>整个架构是模型无关的，可以应用于任何稠密预测任务。提出使用一个辅助目标来更好地利用像素-文本得分图进行分割。由于得分图<span class="math inline">\(\mathbf{s}\in\mathbb{R}^{H_4W_4\times K}\)</span>可以看作一个小的分割结果，因此可以在上面计算一个分割损失： <span class="math display">\[\mathcal{L}^{\operatorname{seg}}_{\operatorname{aux}}=\operatorname{CrossEntropy}(\operatorname{Softmax}(\mathbf{s}/\tau),\mathbf{y})\]</span> 其中，<span class="math inline">\(\tau=0.07,\mathbf{y}\in\{1,\dots,K\}^{H_4W_4}\)</span>是真实值标签。辅助分割损失函数可以帮助特征图更快恢复其局部性，有利于稠密预测任务进行分割和检测。 #### Object detection &amp; instance segmentation</p>
-<p>在这种情况下，没有真实值分割标签。为了构建类似于分割中的辅助损失，使用边界框和标签构建一个二进制目标<span class="math inline">\(\tilde{\mathbf{y}}\in\{0,1\}^{H_4W_4\times K}\)</span>。辅助目标可以定义为二元交叉熵损失： <span class="math display">\[\mathcal{L}^{\operatorname{det}}_{\operatorname{aux}}=\operatorname{BinaryCrossEntropy}(\operatorname{Sigmoid}(\mathbf{s}/\tau),\tilde{\mathbf{y}})\]</span></p>
+                <p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2302.03024">AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION</a></p>
+<h1 id="introduction">Introduction</h1>
+<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272201795.png" srcset="/img/loading.gif" lazyload /></p>
+<p>在视频理解领域，目前主流的两种做法： 1. 在Image Model上加Temporal Module 2. 将Image Model扩展成Video Model</p>
+<p>这些做法存在明显的缺点： 1. 需要full fine-tuning，耗费计算资源 2. 预训练的图像模型具有出色的可移植性，是否还有必要进行full fine-tuning？不充分的fine-tuning可能会破坏模型良好的泛化能力，“灾难性遗忘”</p>
+<p>image-to-image，video-to-video的PEFT工作很多，但是image-to-video的PEFT工作还比较少，因为image model缺少时序推理能力。</p>
+<p>在这篇文章中，作者提出了AIM用于视频动作识别。将预训练的图像模型参数冻结，添加一些轻量化的<a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v97/houlsby19a.html">adapter</a>进行fine-tuning，可以以更少的参数量达到SOTA甚至更好的效果。</p>
+<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272216512.png" srcset="/img/loading.gif" lazyload /></p>
+<p>先添加了<em>spatial adaptation</em>，但是预训练的图像模型在视频理解中已经有足够好的空间建模能力了；复用了预训练图像模型的self-attention层，作用于时间维度，添加<em>temporal adaptation</em>；最后添加<em>joint adaptation</em>。</p>
+<h1 id="methodology">Methodology</h1>
+<h2 id="prelimnary">Prelimnary</h2>
+<p>一般的每个transformer block由一个多头自注意力、一个MLP层、LN层和残差连接构成。写为：</p>
+<p><span class="math display">\[z^{\prime}_l=z_{l-1} + \operatorname{MSA}(\operatorname{LN}(z_{l-1}))\]</span> <span class="math display">\[z_{l}=z_{l}^{\prime}+\operatorname{MLP}(\operatorname{LN}(z_{l}^{\prime}))\]</span> <img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282011349.png" srcset="/img/loading.gif" lazyload /></p>
+<h2 id="spatial-adapation">Spatial Adapation</h2>
+<p>预训练模型已经在大规模数据集上进行了训练，对下游任务有着强大的迁移能力，作者相信它们在视频动作识别中只经过很小的改动就能有很好的空间建模能力。</p>
+<p>Adapter包含了两个全连接层、一个激活函数和一个残差连接，第一个全连接层降维，第二个全连接层升维。为了将预训练的空间特征应用到视频数据中，作者在自注意力层之后加入了一个Adapter，称为<em>spatial adaptation</em>。在训练过程中，transformer层的参数都是冻结的，只有adpater的参数是更新的。</p>
+<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282055287.png" srcset="/img/loading.gif" lazyload /></p>
+<p>上表表明：adapter确实帮助了冻结的图像模型学习到了很好的空间信息，但是与full fine-tuned的模型的性能还有很大的差别，这是因为只有spatial adaptation缺少学习视频中时序信息的能力。</p>
+<h2 id="temporal-adaptation">Temporal Adaptation</h2>
+<p>先前的方法中为了获取时序信息都会给预训练的图像模型添加temporal modules。然而，添加新的temporal modules，无论是temporal attention还是temporal encoder/decoder，都会引入大量额外的可调节参数。而且，这些新的模块都需要full fine-tuning。</p>
+<p>为解决这一问题，作者提出了一种新的策略：复用图像模型中预训练好的自注意力层来做时序建模。将原来的自注意力层称为S-MSA，用于空间建模；复用的自注意力层称为T-MSA，用于时序建模，把T-MSA放在S-MSA前面。给定video pathch embedding <span class="math inline">\(z\in\mathbb{R}^{T\times(N+1)\times D}\)</span>，先将它reshape为<span class="math inline">\(z^{T}\in\mathbb{R}^{(N+1)\times T\times D}\)</span>，送入T-MSA中来学习<span class="math inline">\(T\)</span>帧之间的关系。接下来，跟之前spatial adaptation一样，在复用的注意力层之后加入一个adpater，结构同spatial adaptation一样，<strong>但是没有残差连接</strong>。这样做是为了使模型接近原始模型，所以将adpater的参数初始化为0，并且删除了残差连接，<em>以移除训练开始时temporal adaptation的影响</em>（？）。Temporal adaptation在只引入了另一个轻量化的adapter后就取得了与full fine-tuned模型相近的性能。</p>
+<h2 id="joint-adaptation">Joint Adaptation</h2>
+<p>最后，引入了与MLP层平行的Adapter，称为<em>joint adaptation</em>。这个adapter跟temporal adaptation中的拥有相同的结构。</p>
+<p>最终的计算过程可以写为：</p>
+<p><span class="math display">\[z_{l}^{T}=z_{l-1}+\operatorname{Adapter}(\operatorname{T-MSA}(\operatorname{LN}(z_{l-1})))\]</span> <span class="math display">\[z_{l}^{S}=z_{l}^{T}+\operatorname{Adapter}(\operatorname{S-MSA}(\operatorname{LN}(z_{l}^{T})))\]</span> <span class="math display">\[z_{l}=z_{l}^{S}+\operatorname{MLP}(\operatorname{LN}(z_{l}^{S}))+s\cdot\operatorname{Adapter}(\operatorname{LN}(s_{l}^{S}))\]</span> # Conclusion</p>
+<p>T-MSA只是简单复用了S-MSA，对于视频的时序建模能力不够强大。视频时序建模可以看成是一种序列建模的形式，因此以后可以考虑使用文本或者音频模型的预训练权重，而不是图像模型的。</p>
 
                 
               </div>
@@ -332,7 +345,7 @@
       
         <a href="/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">#论文阅读</a>
       
-        <a href="/tags/CLIP/">#CLIP</a>
+        <a href="/tags/PEFT/">#PEFT</a>
       
     </div>
   
@@ -344,8 +357,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting</div>
-      <div>http://k0145vin.xyz/2023/03/10/论文阅读-DenseCLIP-Language-Guided-Dense-Prediction-with-Context-Aware-Prompting/</div>
+      <div>[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION</div>
+      <div>http://k0145vin.xyz/2023/03/29/论文阅读-AIM-ADAPTING-IMAGE-MODELS-FOR-EFFICIENT-VIDEO-ACTION-RECOGNITION/</div>
     </div>
     <div class="license-meta">
       
@@ -357,7 +370,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年3月10日</div>
+          <div>2023年3月29日</div>
         </div>
       
       
@@ -387,18 +400,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/03/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-AIM-ADAPTING-IMAGE-MODELS-FOR-EFFICIENT-VIDEO-ACTION-RECOGNITION/" title="[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/03/08/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Video-Swin-Transformer/" title="[论文阅读]Video Swin Transformer">
-                        <span class="hidden-mobile">[论文阅读]Video Swin Transformer</span>
+                      <a href="/2023/03/10/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-DenseCLIP-Language-Guided-Dense-Prediction-with-Context-Aware-Prompting/" title="[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting">
+                        <span class="hidden-mobile">[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
