@@ -28,7 +28,7 @@
 <meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282011349.png">
 <meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282055287.png">
 <meta property="article:published_time" content="2023-03-29T06:51:40.000Z">
-<meta property="article:modified_time" content="2023-03-29T06:53:18.833Z">
+<meta property="article:modified_time" content="2023-03-29T06:56:33.206Z">
 <meta property="article:author" content="一瓶AD钙">
 <meta property="article:tag" content="论文阅读">
 <meta property="article:tag" content="PEFT">
@@ -308,7 +308,8 @@
 <h2 id="joint-adaptation">Joint Adaptation</h2>
 <p>最后，引入了与MLP层平行的Adapter，称为<em>joint adaptation</em>。这个adapter跟temporal adaptation中的拥有相同的结构。</p>
 <p>最终的计算过程可以写为：</p>
-<p><span class="math display">\[z_{l}^{T}=z_{l-1}+\operatorname{Adapter}(\operatorname{T-MSA}(\operatorname{LN}(z_{l-1})))\]</span> <span class="math display">\[z_{l}^{S}=z_{l}^{T}+\operatorname{Adapter}(\operatorname{S-MSA}(\operatorname{LN}(z_{l}^{T})))\]</span> <span class="math display">\[z_{l}=z_{l}^{S}+\operatorname{MLP}(\operatorname{LN}(z_{l}^{S}))+s\cdot\operatorname{Adapter}(\operatorname{LN}(s_{l}^{S}))\]</span> # Conclusion</p>
+<p><span class="math display">\[z_{l}^{T}=z_{l-1}+\operatorname{Adapter}(\operatorname{T-MSA}(\operatorname{LN}(z_{l-1})))\]</span> <span class="math display">\[z_{l}^{S}=z_{l}^{T}+\operatorname{Adapter}(\operatorname{S-MSA}(\operatorname{LN}(z_{l}^{T})))\]</span> <span class="math display">\[z_{l}=z_{l}^{S}+\operatorname{MLP}(\operatorname{LN}(z_{l}^{S}))+s\cdot\operatorname{Adapter}(\operatorname{LN}(s_{l}^{S}))\]</span></p>
+<h1 id="conclusion">Conclusion</h1>
 <p>T-MSA只是简单复用了S-MSA，对于视频的时序建模能力不够强大。视频时序建模可以看成是一种序列建模的形式，因此以后可以考虑使用文本或者音频模型的预训练权重，而不是图像模型的。</p>
 
                 
