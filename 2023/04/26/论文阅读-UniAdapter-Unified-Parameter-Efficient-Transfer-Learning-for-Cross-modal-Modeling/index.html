@@ -26,7 +26,7 @@
 <meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304261558303.png">
 <meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304261934989.png">
 <meta property="article:published_time" content="2023-04-26T12:57:21.000Z">
-<meta property="article:modified_time" content="2023-04-26T13:02:43.312Z">
+<meta property="article:modified_time" content="2023-04-26T13:06:23.298Z">
 <meta property="article:author" content="一瓶AD钙">
 <meta property="article:tag" content="论文阅读">
 <meta property="article:tag" content="PEFT">
@@ -316,8 +316,8 @@ UniAdapter(x^{\mathcal{T}})=x^{\mathcal{T}}+s\cdot\sigma(x^{\mathcal{T}}W_{down}
 \end{array}\]</span> 其中，<span class="math inline">\(s\)</span> 是缩放因子，<span class="math inline">\(x^{\mathcal{V}},x^{\mathcal{T}}\)</span> 分别地标视觉和文本特征。</p>
 <p>视觉和文本编码器使用相同的 transformer encoder 结构，遵循 MAM 的设置将 UniAdapter 放在 自注意力层和前馈层之间。</p>
 <h3 id="cross-modal-case">Cross-modal Case</h3>
-<p>此外还利用一个特定的上投射层进行多模态编码器的迁移学习。但是输入特征包含了查询特征和跨模态融合特征。用单个 adapter 来学习这写混合信息非常困难。因此考虑上文提到的，在 UniAdapter 中重复利用文本上投射层 <span class="math inline">\(W_{up}^{\mathcal{T}}\)</span> 来捕获文本信息。这样一来，跨模态上投射层 <span class="math inline">\(W_{up}^{\mathcal{C}}\)</span> 可以更容易地处理跨模态信息。跨模态的 UniAdapter可以表示为： <span class="math display">\[\begin{aligned}
-\operatorname{UniAdapter}\left(x^{\mathcal{C}}\right)= &amp; x^{\mathcal{C}}+s \cdot\left[\sigma\left(x^{\mathcal{C}} W_{\text {down }}\right) W_{u p}^{\mathcal{T}}\right. \\
+<p>此外还利用一个特定的上投射层进行多模态编码器的迁移学习。但是输入特征包含了查询特征和跨模态融合特征。用单个 adapter 来学习这写混合信息非常困难。因此考虑上文提到的，在 UniAdapter 中重复利用文本上投射层 <span class="math inline">\(W_{up}^{\mathcal{T}}\)</span> 来捕获文本信息。这样一来，跨模态上投射层 <span class="math inline">\(W_{up}^{\mathcal{C}}\)</span> 可以更容易地处理跨模态信息。跨模态的 UniAdapter 可以表示为： <span class="math display">\[\begin{aligned}
+UniAdapter\left(x^{\mathcal{C}}\right)= &amp; x^{\mathcal{C}}+s \cdot\left[\sigma\left(x^{\mathcal{C}} W_{\text {down }}\right) W_{u p}^{\mathcal{T}}\right. \\
 &amp; \left.+\sigma\left(x^{\mathcal{C}} W_{\text {down }}\right) W_{u p}^{\mathcal{C}}\right]
 \end{aligned}\]</span> 对于多模态编码器，在交叉注意力层和前馈层之间插入 UniAdapter 。 <span class="math display">\[\boldsymbol{l_l}=UniAdapter(\boldsymbol{q})+UniAdapter(\boldsymbol{h})+\operatorname{FFN}(\operatorname{LN}(\boldsymbol{h}))\]</span></p>
 <h2 id="parameter-free-frame-aware-attention">Parameter-free Frame-aware Attention</h2>
