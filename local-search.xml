@@ -4,6 +4,31 @@
   
   
   <entry>
+    <title>[论文阅读] -LANGUAGE MODELLING WITH PIXELS</title>
+    <link href="/2023/04/26/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-LANGUAGE-MODELLING-WITH-PIXELS/"/>
+    <url>/2023/04/26/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-LANGUAGE-MODELLING-WITH-PIXELS/</url>
+    
+    <content type="html"><![CDATA[<h1 id="approach">Approach</h1><p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172125362.png" /></p><p>三个主要组件： * 文本渲染器：把文字处理成图片 * 编码器：对图片的未遮盖区域进行编码 * 解码器：重建遮盖区域像素</p><h2 id="text-renderer">TEXT RENDERER</h2><p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172141234.png" /></p><p>把文本渲染成 RGB 图片，<span class="math inline">\(x\in\mathbb{R}^{H\times W\times C},H=16,W=8464,C=3\)</span> ，这样就跟分辨率为 <span class="math inline">\(384\times384\)</span> 的图片大小一致，可以分为 <span class="math inline">\(529\)</span> 个 <span class="math inline">\(16\times16\)</span> 的 patch 。序列末尾的空白 patch 不会计算注意力或者损失。 超长的序列会被缩短或者分成多个序列。</p><h2 id="architecture">ARCHITECTURE</h2><h3 id="patch-span-masking">Patch Span Masking</h3><p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172153602.png" /></p><p>不同于 ViT-MAE 的随机屏蔽或者 BEiT 中块级别的屏蔽，PIXEL 采用 <span class="math inline">\(25\%\)</span> 的屏蔽率，最多屏蔽连续 6 个 patch，中间留有不定数量未屏蔽的patch。</p><h1 id="finetuning">FINETUNING</h1><h2 id="extractive-question-answeringqa">Extractive Question Answering(QA)</h2><p>使用滑动窗口的方法来提取超过最大序列长度的例子的答案</p><p>使用一个线性分类器来预测包含答案的间断的开始和结束的 patch</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>论文阅读</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>论文阅读</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION</title>
     <link href="/2023/03/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-AIM-ADAPTING-IMAGE-MODELS-FOR-EFFICIENT-VIDEO-ACTION-RECOGNITION/"/>
     <url>/2023/03/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-AIM-ADAPTING-IMAGE-MODELS-FOR-EFFICIENT-VIDEO-ACTION-RECOGNITION/</url>

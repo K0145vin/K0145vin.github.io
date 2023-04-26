@@ -16,28 +16,26 @@
   <meta name="author" content="一瓶AD钙">
   <meta name="keywords" content="">
   
-    <meta name="description" content="AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION Introduction  在视频理解领域，目前主流的两种做法： 1. 在Image Model上加Temporal Module 2. 将Image Model扩展成Video Model 这些做法存在明显的缺点： 1. 需要full fine-tuning，耗费计">
+    <meta name="description" content="Approach  三个主要组件： * 文本渲染器：把文字处理成图片 * 编码器：对图片的未遮盖区域进行编码 * 解码器：重建遮盖区域像素 TEXT RENDERER  把文本渲染成 RGB 图片，\(x\in\mathbb{R}^{H\times W\times C},H&#x3D;16,W&#x3D;8464,C&#x3D;3\) ，这样就跟分辨率为 \(384\times384\) 的图片大小一致，可以分为 \(529\">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION">
-<meta property="og:url" content="http://k0145vin.xyz/2023/03/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-AIM-ADAPTING-IMAGE-MODELS-FOR-EFFICIENT-VIDEO-ACTION-RECOGNITION/index.html">
+<meta property="og:title" content="[论文阅读] -LANGUAGE MODELLING WITH PIXELS">
+<meta property="og:url" content="http://k0145vin.xyz/2023/04/26/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-LANGUAGE-MODELLING-WITH-PIXELS/index.html">
 <meta property="og:site_name" content="一瓶AD钙的博客">
-<meta property="og:description" content="AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION Introduction  在视频理解领域，目前主流的两种做法： 1. 在Image Model上加Temporal Module 2. 将Image Model扩展成Video Model 这些做法存在明显的缺点： 1. 需要full fine-tuning，耗费计">
+<meta property="og:description" content="Approach  三个主要组件： * 文本渲染器：把文字处理成图片 * 编码器：对图片的未遮盖区域进行编码 * 解码器：重建遮盖区域像素 TEXT RENDERER  把文本渲染成 RGB 图片，\(x\in\mathbb{R}^{H\times W\times C},H&#x3D;16,W&#x3D;8464,C&#x3D;3\) ，这样就跟分辨率为 \(384\times384\) 的图片大小一致，可以分为 \(529\">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272201795.png">
-<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272216512.png">
-<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282011349.png">
-<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282055287.png">
-<meta property="article:published_time" content="2023-03-29T06:51:40.000Z">
-<meta property="article:modified_time" content="2023-03-29T06:56:33.206Z">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172125362.png">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172141234.png">
+<meta property="og:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172153602.png">
+<meta property="article:published_time" content="2023-04-26T07:35:11.000Z">
+<meta property="article:modified_time" content="2023-04-26T07:36:22.062Z">
 <meta property="article:author" content="一瓶AD钙">
 <meta property="article:tag" content="论文阅读">
-<meta property="article:tag" content="PEFT">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272201795.png">
+<meta name="twitter:image" content="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172125362.png">
   
   
   
-  <title>[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION - 一瓶AD钙的博客</title>
+  <title>[论文阅读] -LANGUAGE MODELLING WITH PIXELS - 一瓶AD钙的博客</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -202,7 +200,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION"></span>
+            <span id="subtitle" data-typed-text="[论文阅读] -LANGUAGE MODELLING WITH PIXELS"></span>
           
         </div>
 
@@ -218,8 +216,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-03-29 14:51" pubdate>
-          2023年3月29日 下午
+        <time datetime="2023-04-26 15:35" pubdate>
+          2023年4月26日 下午
         </time>
       </span>
     
@@ -230,7 +228,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.3k 字
+          452 字
         
       </span>
     
@@ -241,7 +239,7 @@
         
         
         
-          20 分钟
+          4 分钟
         
       </span>
     
@@ -279,38 +277,25 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION</h1>
+            <h1 style="display: none">[论文阅读] -LANGUAGE MODELLING WITH PIXELS</h1>
             
             
               <div class="markdown-body">
                 
-                <p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2302.03024">AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION</a></p>
-<h1 id="introduction">Introduction</h1>
-<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272201795.png" srcset="/img/loading.gif" lazyload /></p>
-<p>在视频理解领域，目前主流的两种做法： 1. 在Image Model上加Temporal Module 2. 将Image Model扩展成Video Model</p>
-<p>这些做法存在明显的缺点： 1. 需要full fine-tuning，耗费计算资源 2. 预训练的图像模型具有出色的可移植性，是否还有必要进行full fine-tuning？不充分的fine-tuning可能会破坏模型良好的泛化能力，“灾难性遗忘”</p>
-<p>image-to-image，video-to-video的PEFT工作很多，但是image-to-video的PEFT工作还比较少，因为image model缺少时序推理能力。</p>
-<p>在这篇文章中，作者提出了AIM用于视频动作识别。将预训练的图像模型参数冻结，添加一些轻量化的<a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v97/houlsby19a.html">adapter</a>进行fine-tuning，可以以更少的参数量达到SOTA甚至更好的效果。</p>
-<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303272216512.png" srcset="/img/loading.gif" lazyload /></p>
-<p>先添加了<em>spatial adaptation</em>，但是预训练的图像模型在视频理解中已经有足够好的空间建模能力了；复用了预训练图像模型的self-attention层，作用于时间维度，添加<em>temporal adaptation</em>；最后添加<em>joint adaptation</em>。</p>
-<h1 id="methodology">Methodology</h1>
-<h2 id="prelimnary">Prelimnary</h2>
-<p>一般的每个transformer block由一个多头自注意力、一个MLP层、LN层和残差连接构成。写为：</p>
-<p><span class="math display">\[z^{\prime}_l=z_{l-1} + \operatorname{MSA}(\operatorname{LN}(z_{l-1}))\]</span> <span class="math display">\[z_{l}=z_{l}^{\prime}+\operatorname{MLP}(\operatorname{LN}(z_{l}^{\prime}))\]</span> <img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282011349.png" srcset="/img/loading.gif" lazyload /></p>
-<h2 id="spatial-adapation">Spatial Adapation</h2>
-<p>预训练模型已经在大规模数据集上进行了训练，对下游任务有着强大的迁移能力，作者相信它们在视频动作识别中只经过很小的改动就能有很好的空间建模能力。</p>
-<p>Adapter包含了两个全连接层、一个激活函数和一个残差连接，第一个全连接层降维，第二个全连接层升维。为了将预训练的空间特征应用到视频数据中，作者在自注意力层之后加入了一个Adapter，称为<em>spatial adaptation</em>。在训练过程中，transformer层的参数都是冻结的，只有adpater的参数是更新的。</p>
-<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202303282055287.png" srcset="/img/loading.gif" lazyload /></p>
-<p>上表表明：adapter确实帮助了冻结的图像模型学习到了很好的空间信息，但是与full fine-tuned的模型的性能还有很大的差别，这是因为只有spatial adaptation缺少学习视频中时序信息的能力。</p>
-<h2 id="temporal-adaptation">Temporal Adaptation</h2>
-<p>先前的方法中为了获取时序信息都会给预训练的图像模型添加temporal modules。然而，添加新的temporal modules，无论是temporal attention还是temporal encoder/decoder，都会引入大量额外的可调节参数。而且，这些新的模块都需要full fine-tuning。</p>
-<p>为解决这一问题，作者提出了一种新的策略：复用图像模型中预训练好的自注意力层来做时序建模。将原来的自注意力层称为S-MSA，用于空间建模；复用的自注意力层称为T-MSA，用于时序建模，把T-MSA放在S-MSA前面。给定video pathch embedding <span class="math inline">\(z\in\mathbb{R}^{T\times(N+1)\times D}\)</span>，先将它reshape为<span class="math inline">\(z^{T}\in\mathbb{R}^{(N+1)\times T\times D}\)</span>，送入T-MSA中来学习<span class="math inline">\(T\)</span>帧之间的关系。接下来，跟之前spatial adaptation一样，在复用的注意力层之后加入一个adpater，结构同spatial adaptation一样，<strong>但是没有残差连接</strong>。这样做是为了使模型接近原始模型，所以将adpater的参数初始化为0，并且删除了残差连接，<em>以移除训练开始时temporal adaptation的影响</em>（？）。Temporal adaptation在只引入了另一个轻量化的adapter后就取得了与full fine-tuned模型相近的性能。</p>
-<h2 id="joint-adaptation">Joint Adaptation</h2>
-<p>最后，引入了与MLP层平行的Adapter，称为<em>joint adaptation</em>。这个adapter跟temporal adaptation中的拥有相同的结构。</p>
-<p>最终的计算过程可以写为：</p>
-<p><span class="math display">\[z_{l}^{T}=z_{l-1}+\operatorname{Adapter}(\operatorname{T-MSA}(\operatorname{LN}(z_{l-1})))\]</span> <span class="math display">\[z_{l}^{S}=z_{l}^{T}+\operatorname{Adapter}(\operatorname{S-MSA}(\operatorname{LN}(z_{l}^{T})))\]</span> <span class="math display">\[z_{l}=z_{l}^{S}+\operatorname{MLP}(\operatorname{LN}(z_{l}^{S}))+s\cdot\operatorname{Adapter}(\operatorname{LN}(s_{l}^{S}))\]</span></p>
-<h1 id="conclusion">Conclusion</h1>
-<p>T-MSA只是简单复用了S-MSA，对于视频的时序建模能力不够强大。视频时序建模可以看成是一种序列建模的形式，因此以后可以考虑使用文本或者音频模型的预训练权重，而不是图像模型的。</p>
+                <h1 id="approach">Approach</h1>
+<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172125362.png" srcset="/img/loading.gif" lazyload /></p>
+<p>三个主要组件： * 文本渲染器：把文字处理成图片 * 编码器：对图片的未遮盖区域进行编码 * 解码器：重建遮盖区域像素</p>
+<h2 id="text-renderer">TEXT RENDERER</h2>
+<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172141234.png" srcset="/img/loading.gif" lazyload /></p>
+<p>把文本渲染成 RGB 图片，<span class="math inline">\(x\in\mathbb{R}^{H\times W\times C},H=16,W=8464,C=3\)</span> ，这样就跟分辨率为 <span class="math inline">\(384\times384\)</span> 的图片大小一致，可以分为 <span class="math inline">\(529\)</span> 个 <span class="math inline">\(16\times16\)</span> 的 patch 。序列末尾的空白 patch 不会计算注意力或者损失。 超长的序列会被缩短或者分成多个序列。</p>
+<h2 id="architecture">ARCHITECTURE</h2>
+<h3 id="patch-span-masking">Patch Span Masking</h3>
+<p><img src="https://k0145vin.oss-cn-hangzhou.aliyuncs.com/Image202304172153602.png" srcset="/img/loading.gif" lazyload /></p>
+<p>不同于 ViT-MAE 的随机屏蔽或者 BEiT 中块级别的屏蔽，PIXEL 采用 <span class="math inline">\(25\%\)</span> 的屏蔽率，最多屏蔽连续 6 个 patch，中间留有不定数量未屏蔽的patch。</p>
+<h1 id="finetuning">FINETUNING</h1>
+<h2 id="extractive-question-answeringqa">Extractive Question Answering(QA)</h2>
+<p>使用滑动窗口的方法来提取超过最大序列长度的例子的答案</p>
+<p>使用一个线性分类器来预测包含答案的间断的开始和结束的 patch</p>
 
                 
               </div>
@@ -346,8 +331,6 @@
       
         <a href="/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">#论文阅读</a>
       
-        <a href="/tags/PEFT/">#PEFT</a>
-      
     </div>
   
 </div>
@@ -358,8 +341,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION</div>
-      <div>http://k0145vin.xyz/2023/03/29/论文阅读-AIM-ADAPTING-IMAGE-MODELS-FOR-EFFICIENT-VIDEO-ACTION-RECOGNITION/</div>
+      <div>[论文阅读] -LANGUAGE MODELLING WITH PIXELS</div>
+      <div>http://k0145vin.xyz/2023/04/26/论文阅读-LANGUAGE-MODELLING-WITH-PIXELS/</div>
     </div>
     <div class="license-meta">
       
@@ -371,7 +354,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年3月29日</div>
+          <div>2023年4月26日</div>
         </div>
       
       
@@ -401,18 +384,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/04/26/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-LANGUAGE-MODELLING-WITH-PIXELS/" title="[论文阅读] -LANGUAGE MODELLING WITH PIXELS">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">[论文阅读] -LANGUAGE MODELLING WITH PIXELS</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/03/10/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-DenseCLIP-Language-Guided-Dense-Prediction-with-Context-Aware-Prompting/" title="[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting">
-                        <span class="hidden-mobile">[论文阅读]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting</span>
+                      <a href="/2023/03/29/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-AIM-ADAPTING-IMAGE-MODELS-FOR-EFFICIENT-VIDEO-ACTION-RECOGNITION/" title="[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION">
+                        <span class="hidden-mobile">[论文阅读] AIM: ADAPTING IMAGE MODELS FOR EFFICIENT VIDEO ACTION RECOGNITION</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
